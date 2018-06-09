@@ -14,6 +14,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class RAdapter extends RecyclerView.Adapter<RAdapter.ViewHolder> {
@@ -68,6 +70,10 @@ public class RAdapter extends RecyclerView.Adapter<RAdapter.ViewHolder> {
             app.icon = ri.activityInfo.loadIcon(pm);
             appsList.add(app);
         }
+        Collections.sort(appsList,new Comparator<AppInfo>(){
+            public int compare(AppInfo one, AppInfo two) {
+                return one.label.toString().compareTo(two.label.toString());
+            }});
 
     }
 
