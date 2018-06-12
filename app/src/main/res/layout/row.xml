@@ -16,6 +16,7 @@
 
     <TextView
         android:id="@+id/textView"
+        android:textColor="#FFFFFF"
         android:layout_width="59dp"
         android:layout_height="32dp"
         android:layout_alignParentTop="true"

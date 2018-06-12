@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="shaun.home" >
+    <uses-permission android:name="android.permission.BIND_APPWIDGET" />
 
     <application
         android:allowBackup="true"
@@ -9,7 +10,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme" >
-        <activity android:name="shaun.home.MainActivity" >
+        <activity android:name="shaun.home.MainActivity">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.HOME" />
@@ -18,7 +20,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="shaun.home.AppDrawer" ></activity>
+        <activity android:name="shaun.home.AppDrawer"
+            android:launchMode="singleTask" ></activity>
     </application>
 
 </manifest>

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,7 +20,7 @@ import java.util.Comparator;
 import java.util.List;
 
 public class RAdapter extends RecyclerView.Adapter<RAdapter.ViewHolder> {
-    private List<AppInfo> appsList;
+    public ArrayList<AppInfo> appsList;
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView textView;
@@ -50,30 +51,31 @@ public class RAdapter extends RecyclerView.Adapter<RAdapter.ViewHolder> {
     }
 
 
-
+    PackageManager pm;
     public RAdapter(Context c) {
 
         //This is where we build our list of app details, using the app
         //object we created to store the label, package name and icon
 
-        PackageManager pm = c.getPackageManager();
+        pm = c.getPackageManager();
         appsList = new ArrayList<AppInfo>();
-
-        Intent i = new Intent(Intent.ACTION_MAIN, null);
-        i.addCategory(Intent.CATEGORY_LAUNCHER);
-
-        List<ResolveInfo> allApps = pm.queryIntentActivities(i, 0);
-        for(ResolveInfo ri:allApps) {
-            AppInfo app = new AppInfo();
-            app.label = ri.loadLabel(pm);
-            app.packageName = ri.activityInfo.packageName;
-            app.icon = ri.activityInfo.loadIcon(pm);
-            appsList.add(app);
-        }
-        Collections.sort(appsList,new Comparator<AppInfo>(){
-            public int compare(AppInfo one, AppInfo two) {
-                return one.label.toString().compareTo(two.label.toString());
-            }});
+        new myThread().execute();
+//
+//        Intent i = new Intent(Intent.ACTION_MAIN, null);
+//        i.addCategory(Intent.CATEGORY_LAUNCHER);
+//
+//        List<ResolveInfo> allApps = pm.queryIntentActivities(i, 0);
+//        for(ResolveInfo ri:allApps) {
+//            AppInfo app = new AppInfo();
+//            app.label = ri.loadLabel(pm);
+//            app.packageName = ri.activityInfo.packageName;
+//            app.icon = ri.activityInfo.loadIcon(pm);
+//            appsList.add(app);
+//        }
+//        Collections.sort(appsList,new Comparator<AppInfo>(){
+//            public int compare(AppInfo one, AppInfo two) {
+//                return one.label.toString().compareTo(two.label.toString());
+//            }});
 
     }
 
@@ -114,4 +116,41 @@ public class RAdapter extends RecyclerView.Adapter<RAdapter.ViewHolder> {
         ViewHolder viewHolder = new ViewHolder(view);
         return viewHolder;
     }
+
+    public void updateStuff() {
+        notifyItemInserted(getItemCount()-1);
+
+    }
+
+public class myThread extends AsyncTask<Void, Void, String> {
+
+    @Override
+    protected String doInBackground(Void... Params) {
+
+        Intent i = new Intent(Intent.ACTION_MAIN, null);
+        i.addCategory(Intent.CATEGORY_LAUNCHER);
+
+        List<ResolveInfo> allApps = pm.queryIntentActivities(i, 0);
+        for(ResolveInfo ri:allApps) {
+            AppInfo app = new AppInfo();
+            app.label = ri.loadLabel(pm);
+            app.packageName = ri.activityInfo.packageName;
+            app.icon = ri.activityInfo.loadIcon(pm);
+            appsList.add(app);
+        }
+        Collections.sort(appsList,new Comparator<AppInfo>(){
+            public int compare(AppInfo one, AppInfo two) {
+                return one.label.toString().compareTo(two.label.toString());
+        }});
+        return "Success";
+
+    }
+
+    @Override
+    protected void onPostExecute(String result) {
+        super.onPostExecute(result);
+        updateStuff();
+    }
+
+}
 }
