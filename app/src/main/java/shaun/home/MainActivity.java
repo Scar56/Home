@@ -30,22 +30,22 @@ public class MainActivity extends AppCompatActivity {
         FragmentStatePagerAdapter mPagerAdapter = new HomescreenAdapter(getSupportFragmentManager());
         mPager.setAdapter(mPagerAdapter);
         WallpaperManager wm = WallpaperManager.getInstance(this);
+        WallpaperManager.getInstance(this).setWallpaperOffsetSteps(.5f,-1f);
         mPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener(){
             @Override
             public void onPageScrolled(int p1, float p2, int p3) {
-                WallpaperManager.getInstance(getBaseContext()).setWallpaperOffsets(mPager.getWindowToken(), (float) (2) / (2), 0);
+                WallpaperManager.getInstance(getBaseContext()).setWallpaperOffsets(mPager.getWindowToken(), (p1+p2) / (2), 0);
             }
 
             @Override
             public void onPageSelected(int p1) {
-//                WallpaperManager.getInstance(this).setWallpaperOffsets(mPager.getWindowToken(),(float)p1/(2), 0);
+//                WallpaperManager.getInstance(getBaseContext()).setWallpaperOffsets(mPager.getWindowToken(),(float)p1/(2), 0);
             }
 
             @Override
             public void onPageScrollStateChanged(int p1) {
 
             }});
-        wm.setWallpaperOffsetSteps(.5f,-1f);
     }
 
     public void appDrawerClick(View view){
