@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class homeGridAdapter extends BaseAdapter {
@@ -16,7 +17,7 @@ public class homeGridAdapter extends BaseAdapter {
     }
     @Override
     public int getCount(){
-        return 3;
+        return 1;
     }
 
     @Override
@@ -31,14 +32,14 @@ public class homeGridAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ConstraintLayout homeLay = (ConstraintLayout)homeInf.inflate
+        RelativeLayout homeLay = (RelativeLayout)homeInf.inflate
                 (R.layout.home_app, parent, false);
 
         ImageView Icon = homeLay.findViewById(R.id.ico);
         Icon.setImageDrawable(MainActivity.getActivityIcon(homeInf.getContext(), "com.android.chrome", "com.google.android.apps.chrome.Main"));
         TextView text = homeLay.findViewById(R.id.tie);
         text.setText("Chrome");
-        text.setTextColor(0xFFFFFF);
+//        text.setTextColor(0xFFFFFF);
         //set position as tag
         homeLay.setTag(position);
         return homeLay;

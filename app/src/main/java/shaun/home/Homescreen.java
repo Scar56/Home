@@ -15,6 +15,8 @@ import android.widget.GridView;
  * A simple {@link Fragment} subclass.
  */
 public class Homescreen extends Fragment implements View.OnClickListener{
+    private int num;
+
     public Homescreen() {
         // Required empty public constructor
     }
@@ -33,6 +35,11 @@ public class Homescreen extends Fragment implements View.OnClickListener{
         grid.setOnTouchListener(touchListener);
         return v;
     }
+
+    public void setPageNum(int num){
+        this.num=num;
+    }
+
     View.OnTouchListener touchListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event) {

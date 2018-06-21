@@ -18,15 +18,22 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category."/>
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity android:name="shaun.home.AppDrawer"
-            android:launchMode="singleTask" ></activity>
+            android:launchMode="singleTask" ><intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" /></intent-filter></activity>
         <!--<service android:name="android.server.wallpaper.WallpaperService"-->
             <!--&gt;</service>-->
+        <provider
+        android:authorities="com.bennyv4.fivesecdelaycp"
+        android:grantUriPermissions="true"
+        android:exported="true"
+        android:enabled="true"
+        android:name=".Kustom"/>
     </application>
 
 </manifest>

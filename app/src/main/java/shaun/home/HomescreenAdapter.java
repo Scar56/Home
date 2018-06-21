@@ -15,18 +15,23 @@ import android.widget.TextView;
 
 public class HomescreenAdapter extends FragmentStatePagerAdapter {
     private int NUM_PAGES=3;
-    public HomescreenAdapter(FragmentManager fm) {
+    private Context c;
+    public HomescreenAdapter(Context c, FragmentManager fm) {
         super(fm);
+        this.c = c;
     }
 
     @Override
     public Fragment getItem(int position) {
-        return new Homescreen();
+        Homescreen h = new Homescreen();
+        h.setPageNum(position);
+        return h;
     }
 
     @Override
     public int getCount() {
-        return NUM_PAGES;
+        return c.getSharedPreferences("screens", Context.MODE_PRIVATE).getInt("horiz",1);
+
     }
 
 }

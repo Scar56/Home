@@ -4,6 +4,7 @@ import android.app.WallpaperManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
@@ -22,12 +23,17 @@ public class MainActivity extends AppCompatActivity {
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        this.getSharedPreferences("screens", MODE_PRIVATE).edit().putInt("horiz",3).commit();
+
         //TODO vertical pages
         final ViewPager mPager = (ViewPager) findViewById(R.id.homescreenPager);
-        FragmentStatePagerAdapter mPagerAdapter = new HomescreenAdapter(getSupportFragmentManager());
+        FragmentStatePagerAdapter mPagerAdapter = new HomescreenAdapter(this, getSupportFragmentManager());
         mPager.setAdapter(mPagerAdapter);
         wm = WallpaperManager.getInstance(this);
         wm.setWallpaperOffsetSteps(.5f,-1f);
+
+        //
         mPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener(){
             @Override
             public void onPageScrolled(int p1, float p2, int p3) {
