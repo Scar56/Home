@@ -16,11 +16,11 @@
 
     <TextView
         android:id="@+id/textView"
-        android:textColor="#FFFFFF"
-        android:layout_width="59dp"
+        android:layout_width="352dp"
         android:layout_height="32dp"
         android:layout_alignParentTop="true"
         android:layout_toEndOf="@+id/img"
+        android:textColor="#FFFFFF"
         tools:layout_editor_absoluteX="32dp"
         tools:layout_editor_absoluteY="0dp" />
 

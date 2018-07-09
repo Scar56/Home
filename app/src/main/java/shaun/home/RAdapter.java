@@ -20,7 +20,7 @@ import java.util.Comparator;
 import java.util.List;
 
 public class RAdapter extends RecyclerView.Adapter<RAdapter.ViewHolder> {
-    public ArrayList<AppInfo> appsList;
+    public static ArrayList<AppInfo> appsList;
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView textView;
@@ -51,15 +51,12 @@ public class RAdapter extends RecyclerView.Adapter<RAdapter.ViewHolder> {
     }
 
 
-    PackageManager pm;
     public RAdapter(Context c) {
 
         //This is where we build our list of app details, using the app
         //object we created to store the label, package name and icon
 
-        pm = c.getPackageManager();
         appsList = new ArrayList<AppInfo>();
-        new myThread().execute();
 //
 //        Intent i = new Intent(Intent.ACTION_MAIN, null);
 //        i.addCategory(Intent.CATEGORY_LAUNCHER);
@@ -121,36 +118,4 @@ public class RAdapter extends RecyclerView.Adapter<RAdapter.ViewHolder> {
         notifyItemInserted(getItemCount()-1);
 
     }
-
-public class myThread extends AsyncTask<Void, Void, String> {
-
-    @Override
-    protected String doInBackground(Void... Params) {
-
-        Intent i = new Intent(Intent.ACTION_MAIN, null);
-        i.addCategory(Intent.CATEGORY_LAUNCHER);
-
-        List<ResolveInfo> allApps = pm.queryIntentActivities(i, 0);
-        for(ResolveInfo ri:allApps) {
-            AppInfo app = new AppInfo();
-            app.label = ri.loadLabel(pm);
-            app.packageName = ri.activityInfo.packageName;
-            app.icon = ri.activityInfo.loadIcon(pm);
-            appsList.add(app);
-        }
-        Collections.sort(appsList,new Comparator<AppInfo>(){
-            public int compare(AppInfo one, AppInfo two) {
-                return one.label.toString().compareTo(two.label.toString());
-        }});
-        return "Success";
-
-    }
-
-    @Override
-    protected void onPostExecute(String result) {
-        super.onPostExecute(result);
-        updateStuff();
-    }
-
-}
 }

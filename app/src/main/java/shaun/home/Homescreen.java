@@ -15,7 +15,9 @@ import android.widget.GridView;
  * A simple {@link Fragment} subclass.
  */
 public class Homescreen extends Fragment implements View.OnClickListener{
-    private int num;
+    private int pos;
+    //TODO
+    private int[] posA;
 
     public Homescreen() {
         // Required empty public constructor
@@ -36,18 +38,30 @@ public class Homescreen extends Fragment implements View.OnClickListener{
         return v;
     }
 
-    public void setPageNum(int num){
-        this.num=num;
+    public void setPageNum(int pos){
+        this.pos=pos;
     }
+
+    public void setPageNum(int[] pos){
+        this.posA=pos;
+    }
+
+    int x;
+    int y;
 
     View.OnTouchListener touchListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
 
             // save the X,Y coordinates
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN){
+                x=(int) event.getX();
+                y=(int) event.getY();
+            }
+            if (event.getAction() == MotionEvent.ACTION_UP) {
                 v.performClick();
-                WallpaperManager.getInstance(v.getContext()).sendWallpaperCommand(v.getWindowToken(), WallpaperManager.COMMAND_TAP,(int)event.getX(),(int)event.getY(),0,new Bundle());
+//                if(x==(int) event.getX()&&y==(int) event.getY())
+                    WallpaperManager.getInstance(v.getContext()).sendWallpaperCommand(v.getWindowToken(), WallpaperManager.COMMAND_TAP,93,y+50,0,new Bundle());
             }
 
             // let the touch event pass on to whoever needs it

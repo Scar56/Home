@@ -14,13 +14,16 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class HomescreenAdapter extends FragmentStatePagerAdapter {
-    private int NUM_PAGES=3;
+    private int NUM_PAGES = 3;
     private Context c;
+
     public HomescreenAdapter(Context c, FragmentManager fm) {
         super(fm);
         this.c = c;
     }
 
+
+    //fulfill extension requirements
     @Override
     public Fragment getItem(int position) {
         Homescreen h = new Homescreen();
@@ -28,9 +31,15 @@ public class HomescreenAdapter extends FragmentStatePagerAdapter {
         return h;
     }
 
+    public Fragment getItem(int position[]) {
+        Homescreen h = new Homescreen();
+        h.setPageNum(position);
+        return h;
+    }
+
     @Override
     public int getCount() {
-        return c.getSharedPreferences("screens", Context.MODE_PRIVATE).getInt("horiz",1);
+        return c.getSharedPreferences("screens", Context.MODE_PRIVATE).getInt("horiz", 1);
 
     }
 

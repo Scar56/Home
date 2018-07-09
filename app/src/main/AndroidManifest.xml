@@ -23,9 +23,11 @@
             </intent-filter>
         </activity>
         <activity android:name="shaun.home.AppDrawer"
-            android:launchMode="singleTask" ><intent-filter>
-            <action android:name="android.intent.action.VIEW" />
-            <category android:name="android.intent.category.DEFAULT" /></intent-filter></activity>
+            android:launchMode="singleTask" >
+        </activity>
+        <!--<intent-filter>-->
+            <!--<action android:name="android.intent.action.VIEW" />-->
+            <!--<category android:name="android.intent.category.DEFAULT" /></intent-filter>-->
         <!--<service android:name="android.server.wallpaper.WallpaperService"-->
             <!--&gt;</service>-->
         <provider
