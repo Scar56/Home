@@ -12,6 +12,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.LruCache;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -61,11 +62,28 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 LayoutInflater inflater = LayoutInflater
                         .from(getApplicationContext());
-                CircularLayout corner = (CircularLayout) inflater.inflate(R.layout.corner, null);
+                RelativeLayout corner = (RelativeLayout) inflater.inflate(R.layout.corner, null);
+                int id = View.generateViewId();
+                corner.setId(id);
                 //se we figured out how to inflate the image, still nee to figure out the positioning
                 ((RelativeLayout) findViewById(R.id.main_activity)).addView(corner);
                 ((ImageView) findViewById(R.id.imageView2)).setImageDrawable(MainActivity.getActivityIcon(getBaseContext(), "com.android.chrome", "com.google.android.apps.chrome.Main"));
 
+                ((ImageView) findViewById(R.id.imageView3)).setImageDrawable(MainActivity.getActivityIcon(getBaseContext(), "com.android.chrome", "com.google.android.apps.chrome.Main"));
+
+                DisplayMetrics displayMetrics = new DisplayMetrics();
+                getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+                int width = displayMetrics.widthPixels;
+                int height = displayMetrics.heightPixels;
+                RelativeLayout cornerView= findViewById(id);
+                RelativeLayout.LayoutParams cLayParam = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+//                        cornerView.getLayoutParams();
+//                cLayParam.width=width;
+//                //noinspection SuspiciousNameCombination
+//                cLayParam.height=width;
+                cLayParam.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                cLayParam.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+                cornerView.setLayoutParams(cLayParam);
             }
         });
     }
