@@ -60,27 +60,27 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
+                //create new corner layout
                 LayoutInflater inflater = LayoutInflater
                         .from(getApplicationContext());
                 RelativeLayout corner = (RelativeLayout) inflater.inflate(R.layout.corner, null);
+                //give it an id
                 int id = View.generateViewId();
                 corner.setId(id);
-                //se we figured out how to inflate the image, still nee to figure out the positioning
+                //add it to the main view
                 ((RelativeLayout) findViewById(R.id.main_activity)).addView(corner);
+                //change images
                 ((ImageView) findViewById(R.id.imageView2)).setImageDrawable(MainActivity.getActivityIcon(getBaseContext(), "com.android.chrome", "com.google.android.apps.chrome.Main"));
-
                 ((ImageView) findViewById(R.id.imageView3)).setImageDrawable(MainActivity.getActivityIcon(getBaseContext(), "com.android.chrome", "com.google.android.apps.chrome.Main"));
 
-                DisplayMetrics displayMetrics = new DisplayMetrics();
-                getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-                int width = displayMetrics.widthPixels;
-                int height = displayMetrics.heightPixels;
+//                DisplayMetrics displayMetrics = new DisplayMetrics();
+//                getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+//                int width = displayMetrics.widthPixels;
+//                int height = displayMetrics.heightPixels;
+
+                //set position
                 RelativeLayout cornerView= findViewById(id);
                 RelativeLayout.LayoutParams cLayParam = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-//                        cornerView.getLayoutParams();
-//                cLayParam.width=width;
-//                //noinspection SuspiciousNameCombination
-//                cLayParam.height=width;
                 cLayParam.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
                 cLayParam.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
                 cornerView.setLayoutParams(cLayParam);
