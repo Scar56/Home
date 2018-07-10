@@ -9,14 +9,16 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-public class homeGridAdapter extends BaseAdapter {
+public class CornerAdapter  extends BaseAdapter {
     private LayoutInflater homeInf;
-    public homeGridAdapter(Context c){
+    private String name;
+    public CornerAdapter(Context c, String name){
         homeInf = LayoutInflater.from(c);
+        this.name = name;
     }
     @Override
     public int getCount(){
-        return 1;
+        return homeInf.getContext().getSharedPreferences("screens", Context.MODE_PRIVATE).getInt(name, 1);
     }
 
     @Override
@@ -41,6 +43,12 @@ public class homeGridAdapter extends BaseAdapter {
 //        text.setTextColor(0xFFFFFF);
         //set position as tag
         homeLay.setTag(position);
+        homeLay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                v.getTag();
+            }
+        });
         return homeLay;
     }
 

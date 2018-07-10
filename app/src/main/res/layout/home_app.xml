@@ -5,16 +5,16 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
     <ImageView
-        android:id="@+id/ico"
+        android:id="@+id/icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/appshortcut_pinning" />
 
     <TextView
-        android:id="@+id/tie"
+        android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/ico"
+        android:layout_below="@+id/icon"
         tools:textColor="#ffffff" />
 
 </RelativeLayout>

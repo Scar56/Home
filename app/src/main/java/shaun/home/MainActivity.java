@@ -26,6 +26,8 @@ import android.widget.RelativeLayout;
 
 public class MainActivity extends AppCompatActivity {
     WallpaperManager wm;
+    public static int currentTapped = 0;
+    public int viewID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,30 +62,40 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                //create new corner layout
-                LayoutInflater inflater = LayoutInflater
-                        .from(getApplicationContext());
-                RelativeLayout corner = (RelativeLayout) inflater.inflate(R.layout.corner, null);
-                //give it an id
-                int id = View.generateViewId();
-                corner.setId(id);
-                //add it to the main view
-                ((RelativeLayout) findViewById(R.id.main_activity)).addView(corner);
-                //change images
-                ((ImageView) findViewById(R.id.imageView2)).setImageDrawable(MainActivity.getActivityIcon(getBaseContext(), "com.android.chrome", "com.google.android.apps.chrome.Main"));
-                ((ImageView) findViewById(R.id.imageView3)).setImageDrawable(MainActivity.getActivityIcon(getBaseContext(), "com.android.chrome", "com.google.android.apps.chrome.Main"));
+               RelativeLayout main = ((RelativeLayout) findViewById(R.id.main_activity));
+               int temp = currentTapped;
+                if(currentTapped!=0){
+                    currentTapped=0;
+                    main.removeView(findViewById(viewID));
+                }
+                if(temp != v.getId()) {
+                    currentTapped = v.getId();
+                    //create new corner layout
+                    LayoutInflater inflater = LayoutInflater
+                            .from(getApplicationContext());
+                    CircularLayout corner = (CircularLayout) inflater.inflate(R.layout.corner, null);
+                    //give it an id
+                    int id = View.generateViewId();
+                    viewID = id;
+                    corner.setId(id);
+                    //add it to the main view
+                    main.addView(corner);
+                    //change images
+                    ((ImageView) findViewById(R.id.imageView2)).setImageDrawable(MainActivity.getActivityIcon(getBaseContext(), "com.android.chrome", "com.google.android.apps.chrome.Main"));
+                    ((ImageView) findViewById(R.id.imageView3)).setImageDrawable(MainActivity.getActivityIcon(getBaseContext(), "com.android.chrome", "com.google.android.apps.chrome.Main"));
 
 //                DisplayMetrics displayMetrics = new DisplayMetrics();
 //                getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
 //                int width = displayMetrics.widthPixels;
 //                int height = displayMetrics.heightPixels;
 
-                //set position
-                RelativeLayout cornerView= findViewById(id);
-                RelativeLayout.LayoutParams cLayParam = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                cLayParam.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-                cLayParam.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-                cornerView.setLayoutParams(cLayParam);
+                    //set position
+                    CircularLayout cornerView = findViewById(id);
+                    RelativeLayout.LayoutParams cLayParam = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                    cLayParam.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                    cLayParam.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+                    cornerView.setLayoutParams(cLayParam);
+                }
             }
         });
     }
