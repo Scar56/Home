@@ -1,6 +1,7 @@
 package shaun.home;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class CornerAdapter  extends BaseAdapter {
     private LayoutInflater homeInf;
@@ -18,7 +20,7 @@ public class CornerAdapter  extends BaseAdapter {
     }
     @Override
     public int getCount(){
-        return homeInf.getContext().getSharedPreferences("screens", Context.MODE_PRIVATE).getInt(name, 1);
+        return homeInf.getContext().getSharedPreferences("corners", Context.MODE_PRIVATE).getInt("LR", 1);
     }
 
     @Override
@@ -46,9 +48,13 @@ public class CornerAdapter  extends BaseAdapter {
         homeLay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Context context = v.getContext();
                 v.getTag();
+                Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage("com.android.chrome");
+                context.startActivity(launchIntent);
             }
         });
+        ;
         return homeLay;
     }
 

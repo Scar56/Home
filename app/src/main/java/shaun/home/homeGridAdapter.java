@@ -16,7 +16,7 @@ public class homeGridAdapter extends BaseAdapter {
     }
     @Override
     public int getCount(){
-        return 1;
+        return 0;
     }
 
     @Override

@@ -1,5 +1,7 @@
 package shaun.home;
 
+import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -109,6 +111,16 @@ public class RAdapter extends RecyclerView.Adapter<RAdapter.ViewHolder> {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
         View view = inflater.inflate(R.layout.row, parent, false);
+        view.setOnLongClickListener(new View.OnLongClickListener(){
+            @Override
+            public boolean onLongClick(View view){
+
+                ClipData.Item item = new ClipData.Item((CharSequence)view.getTag());
+                String[] mimeTypes = {ClipDescription.MIMETYPE_TEXT_PLAIN};
+                view.startDragAndDrop(new ClipData("M",mimeTypes, item), new View.DragShadowBuilder(view.findViewById(R.id.img)),null,0);
+                return true;
+            }
+        });
 
         ViewHolder viewHolder = new ViewHolder(view);
         return viewHolder;
