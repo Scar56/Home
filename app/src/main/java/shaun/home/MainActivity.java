@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
 
                 //set position
                 CircularLayout cornerView = findViewById(id);
-                RelativeLayout.LayoutParams cLayParam = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                RelativeLayout.LayoutParams cLayParam = (RelativeLayout.LayoutParams) cornerView.getLayoutParams();
                 cLayParam.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
                 cLayParam.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
                 cornerView.setLayoutParams(cLayParam);

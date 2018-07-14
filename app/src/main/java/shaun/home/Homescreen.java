@@ -58,10 +58,11 @@ public class Homescreen extends Fragment implements View.OnClickListener{
                 x=(int) event.getX();
                 y=(int) event.getY();
             }
+            //TODO differentiate swipe from touch
             if (event.getAction() == MotionEvent.ACTION_UP) {
                 v.performClick();
 //                if(x==(int) event.getX()&&y==(int) event.getY())
-                    WallpaperManager.getInstance(v.getContext()).sendWallpaperCommand(v.getWindowToken(), WallpaperManager.COMMAND_TAP,93,y+50,0,new Bundle());
+                    WallpaperManager.getInstance(v.getContext()).sendWallpaperCommand(v.getWindowToken(), WallpaperManager.COMMAND_TAP,x,y+50,0,new Bundle());
             }
 
             // let the touch event pass on to whoever needs it

@@ -14,9 +14,26 @@ import android.widget.Toast;
 public class CornerAdapter  extends BaseAdapter {
     private LayoutInflater homeInf;
     private String name;
+    //used for code reusability of corners
+    private int ymod;
+    private int xmod;
     public CornerAdapter(Context c, String name){
         homeInf = LayoutInflater.from(c);
         this.name = name;
+        switch (name){
+            case "UL":
+                ymod = 1;
+                xmod= -1;
+            case "UR":
+                ymod = 1;
+                xmod= 1;
+            case "LL":
+                ymod = -1;
+                xmod= -1;
+            case "LR":
+                ymod = -1;
+                xmod= 1;
+        }
     }
     @Override
     public int getCount(){
@@ -42,7 +59,6 @@ public class CornerAdapter  extends BaseAdapter {
         Icon.setImageDrawable(MainActivity.getActivityIcon(homeInf.getContext(), "com.android.chrome", "com.google.android.apps.chrome.Main"));
         TextView text = homeLay.findViewById(R.id.title);
         text.setText("Chrome");
-//        text.setTextColor(0xFFFFFF);
         //set position as tag
         homeLay.setTag(position);
         homeLay.setOnClickListener(new View.OnClickListener() {
@@ -54,7 +70,9 @@ public class CornerAdapter  extends BaseAdapter {
                 context.startActivity(launchIntent);
             }
         });
-        ;
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) homeLay.getLayoutParams();
+        params.setMargins(Math.max(0,(position+1)*40*xmod), Math.max(0,0*xmod),Math.max(0,0 *-xmod),Math.max(0,(position+1)*100*-ymod));
+        homeLay.setLayoutParams(params);
         return homeLay;
     }
 
