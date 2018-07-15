@@ -1,5 +1,21 @@
 package shaun.home;
+/*
+    Nexus is a home launcher for the Android platform
+    Copyright (C) 2018 Shaun Carpenter
 
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
 import android.app.WallpaperManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -7,19 +23,13 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
-import android.media.Image;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
-import android.util.LruCache;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
-import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -35,8 +45,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        this.getSharedPreferences("screens", MODE_PRIVATE).edit().putInt("horiz",3).commit();
-        this.getSharedPreferences("corners", MODE_PRIVATE).edit().putInt("LR",1).commit();
+        this.getSharedPreferences("screens", MODE_PRIVATE).edit().putInt("horiz",3).apply();
+        this.getSharedPreferences("corners", MODE_PRIVATE).edit().putInt("LR",1).apply();
 
         //TODO vertical pages
         final ViewPager mPager = (ViewPager) findViewById(R.id.homescreenPager);

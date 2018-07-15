@@ -1,4 +1,20 @@
-package shaun.home;
+/*
+ * Copyright (C) 2006 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package shaun.Pagers;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -50,8 +66,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import shaun.home.HomescreenAdapter;
-
 public class TwoDimViewPager extends ViewGroup {
 
     public TwoDimViewPager(Context context) {
@@ -71,7 +85,7 @@ public class TwoDimViewPager extends ViewGroup {
 //        setOverScrollMode(OVER_SCROLL_NEVER);
 //    }
 
-//    private class VerticalPageTransformer implements shaun.home.TwoDimViewPager.PageTransformer {
+//    private class VerticalPageTransformer implements shaun.Pagers.TwoDimViewPager.PageTransformer {
 //
 //        @Override
 //        public void transformPage(View view, float position) {
@@ -492,7 +506,7 @@ public class TwoDimViewPager extends ViewGroup {
 
     private final Rect mTempRect = new Rect();
 
-    shaun.home.PagerAdapter mAdapter;
+    PagerAdapter mAdapter;
     int mCurItem;   // Index of horizontal position currently displayed page.
     int mCurItemV;  //Index of vertical position of the currently displayed page
     private int mRestoredCurItem[] = {-1,-1};
@@ -707,7 +721,7 @@ public class TwoDimViewPager extends ViewGroup {
          * @param newAdapter the newly set adapter
          */
         void onAdapterChanged(@NonNull TwoDimViewPager viewPager,
-                              @Nullable shaun.home.PagerAdapter oldAdapter, @Nullable shaun.home.PagerAdapter newAdapter);
+                              @Nullable PagerAdapter oldAdapter, @Nullable PagerAdapter newAdapter);
     }
 
     /**
@@ -832,7 +846,7 @@ public class TwoDimViewPager extends ViewGroup {
      *
      * @param adapter Adapter to use
      */
-    public void setAdapter(@Nullable shaun.home.PagerAdapter adapter) {
+    public void setAdapter(@Nullable PagerAdapter adapter) {
         if (mAdapter != null) {
             mAdapter.setViewPagerObserver(null);
             mAdapter.startUpdate(this);
@@ -847,7 +861,7 @@ public class TwoDimViewPager extends ViewGroup {
             scrollTo(0, 0);
         }
 
-        final shaun.home.PagerAdapter oldAdapter = mAdapter;
+        final PagerAdapter oldAdapter = mAdapter;
         mAdapter = adapter;
         mExpectedAdapterCount = 0;
 
