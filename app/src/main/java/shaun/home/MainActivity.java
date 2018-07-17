@@ -17,32 +17,40 @@ package shaun.home;
     along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 import android.app.WallpaperManager;
+import android.app.admin.DeviceAdminReceiver;
+import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
+import android.os.PowerManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.GestureDetector.OnGestureListener;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity{
     WallpaperManager wm;
     public static int currentTapped = 0;
     public int viewID;
+    private OnGestureListener gestureScanner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
         this.getSharedPreferences("screens", MODE_PRIVATE).edit().putInt("horiz",3).apply();
@@ -52,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
         final ViewPager mPager = (ViewPager) findViewById(R.id.homescreenPager);
         FragmentStatePagerAdapter mPagerAdapter = new HomescreenAdapter(this, getSupportFragmentManager());
         mPager.setAdapter(mPagerAdapter);
+
         wm = WallpaperManager.getInstance(this);
         wm.setWallpaperOffsetSteps(.5f,-1f);
 
@@ -71,7 +80,6 @@ public class MainActivity extends AppCompatActivity {
         ImageButton button = (ImageButton) findViewById(R.id.LRButton);
         button.setOnClickListener(new CornerListener());
     }
-
     private class CornerListener implements View.OnClickListener {
         public CornerListener(){
             super();
@@ -79,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
         }
         @Override
         public void onClick(View v) {
+            lock();
             RelativeLayout main = ((RelativeLayout) findViewById(R.id.main_activity));
             int temp = currentTapped;
             if(currentTapped!=0){
@@ -135,5 +144,47 @@ public class MainActivity extends AppCompatActivity {
         ResolveInfo resolveInfo = pm.resolveActivity(intent, 0);
 
         return resolveInfo.loadIcon(pm);
+    }
+
+
+    public class AdminReceiver extends DeviceAdminReceiver {
+        public static final String ACTION_DISABLED = "device_admin_action_disabled";
+        public static final String ACTION_ENABLED = "device_admin_action_enabled";
+
+        public AdminReceiver(){
+            super();
+        }
+        @Override
+        public void onDisabled(Context context, Intent intent) {
+            super.onDisabled(context, intent);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(
+                    new Intent(ACTION_DISABLED));
+        }
+        @Override
+        public void onEnabled(Context context, Intent intent) {
+            super.onEnabled(context, intent);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(
+                    new Intent(ACTION_ENABLED));
+        }
+    }
+    private void lock() {
+        PowerManager pm = (PowerManager)getSystemService(Context.POWER_SERVICE);
+        if (pm.isScreenOn()) {
+            DevicePolicyManager policy = (DevicePolicyManager)
+                    getSystemService(Context.DEVICE_POLICY_SERVICE);
+            try {
+                policy.lockNow();
+            } catch (SecurityException ex) {
+                Toast.makeText(
+                        this,
+                        "must enable device administrator",
+                        Toast.LENGTH_LONG).show();
+                ComponentName admin = new ComponentName(this, AdminReceiver.class);
+                Intent intent = new Intent(
+                        DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).putExtra(
+                        DevicePolicyManager.EXTRA_DEVICE_ADMIN, admin);
+                this.startActivity(intent);
+            }
+        }
     }
 }
