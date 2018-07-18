@@ -3,9 +3,11 @@
     package="shaun.home" >
     <uses-permission android:name="android.permission.BIND_APPWIDGET" />
     <uses-permission android:name="android.permission.BIND_WALLPAPER" />
+    <uses-permission android:name="android.permission.DEVICE_POWER"/>
 
     <application
         android:allowBackup="true"
+        android:sharedUserId="android.uid.system"
         android:launchMode="singleTask"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -37,8 +39,8 @@
         android:enabled="true"
         android:name=".Kustom"/>
         <receiver
-            android:name=".MainActivity$AdminReceiver"
-            android:permission="android.permission.BIND_DEVICE_ADMIN">
+            android:name=".AdminReceiver"
+            android:permission="android.permission.BIND_DEVICE_ADMIN, an">
             <meta-data
                 android:name="android.app.device_admin"
                 android:resource="@xml/device_admin_sample" />

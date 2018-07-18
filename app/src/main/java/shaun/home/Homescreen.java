@@ -5,6 +5,7 @@ import android.app.WallpaperManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -50,8 +51,17 @@ public class Homescreen extends Fragment implements View.OnClickListener{
     int y;
 
     View.OnTouchListener touchListener = new View.OnTouchListener() {
+        private GestureDetector gestureDetector = new GestureDetector(new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                new AdminReceiver(getContext()).lock();
+                return super.onDoubleTap(e);
+            }
+            // implement here other callback methods like onFling, onScroll as necessary
+        });
         @Override
         public boolean onTouch(View v, MotionEvent event) {
+            gestureDetector.onTouchEvent(event);
 
             // save the X,Y coordinates
             if (event.getAction() == MotionEvent.ACTION_DOWN){
