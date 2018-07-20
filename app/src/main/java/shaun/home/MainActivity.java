@@ -38,7 +38,7 @@ import android.widget.RelativeLayout;
 public class MainActivity extends AppCompatActivity{
     WallpaperManager wm;
     public static int currentTapped = 0;
-    public int viewID;
+    public int viewID = R.id.corner;
     private OnGestureListener gestureScanner;
 
     @Override
@@ -95,9 +95,9 @@ public class MainActivity extends AppCompatActivity{
                         .from(getApplicationContext());
                 CircularLayout corner = (CircularLayout) inflater.inflate(R.layout.corner, null);
                 //give it an id
-                int id = View.generateViewId();
-                viewID = id;
-                corner.setId(id);
+//                int id = View.generateViewId();
+//                viewID = id;
+//                corner.setId(id);
                 //add it to the main view
                 main.addView(corner);
                 //change images
@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity{
 //                int height = displayMetrics.heightPixels;
 
                 //set position
-                CircularLayout cornerView = findViewById(id);
+                CircularLayout cornerView = findViewById(R.id.corner);
                 RelativeLayout.LayoutParams cLayParam = (RelativeLayout.LayoutParams) cornerView.getLayoutParams();
                 cLayParam.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
                 cLayParam.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);

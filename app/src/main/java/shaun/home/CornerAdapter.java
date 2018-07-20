@@ -1,5 +1,6 @@
 package shaun.home;
 /*
+    adapter for corner menus of home screen
     Copyright (C) 2018 Shaun Carpenter
 
     This program is free software: you can redistribute it and/or modify
@@ -81,6 +82,8 @@ public class CornerAdapter  extends BaseAdapter {
             public void onClick(View v) {
                 Context context = v.getContext();
                 v.getTag();
+                RelativeLayout main = ((RelativeLayout) v.getRootView().findViewById(R.id.main_activity));
+                main.removeView(v.getRootView().findViewById(R.id.corner));
                 Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage("com.android.chrome");
                 context.startActivity(launchIntent);
             }

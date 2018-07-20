@@ -86,6 +86,7 @@ public class RAdapter extends RecyclerView.Adapter<RAdapter.ViewHolder> {
         textView.setText(appLabel);
         ImageView imageView = viewHolder.img;
         imageView.setImageDrawable(appIcon);
+        textView.setTag(i);
     }
 
 
@@ -110,9 +111,9 @@ public class RAdapter extends RecyclerView.Adapter<RAdapter.ViewHolder> {
             @Override
             public boolean onLongClick(View view){
 
-                ClipData.Item item = new ClipData.Item((CharSequence)view.getTag());
+                ClipData.Item item = new ClipData.Item((CharSequence)appsList.get((int)view.findViewById(R.id.textView).getTag()).packageName);
                 String[] mimeTypes = {ClipDescription.MIMETYPE_TEXT_PLAIN};
-                view.startDragAndDrop(new ClipData("M",mimeTypes, item), new View.DragShadowBuilder(view.findViewById(R.id.img)),null,0);
+                view.startDragAndDrop(new ClipData(((TextView)view.findViewById(R.id.textView)).getText(),mimeTypes, item), new View.DragShadowBuilder(view.findViewById(R.id.img)),null,0);
                 return true;
             }
         });
