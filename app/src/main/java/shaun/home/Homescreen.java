@@ -1,5 +1,20 @@
 package shaun.home;
+/*
+    Copyright (C) 2018 Shaun Carpenter
 
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
 
 import android.app.WallpaperManager;
 import android.content.Intent;
@@ -35,7 +50,7 @@ public class Homescreen extends Fragment implements View.OnClickListener{
 //        Icon.setImageDrawable(MainActivity.getActivityIcon(this.getContext(), "com.android.chrome", "com.google.android.apps.chrome.Main"));
 //        TextView text = v.findViewById(R.id.title);
 //        text.setText("Chrome");
-        grid.setOnTouchListener(touchListener);
+        grid.setOnTouchListener(new touchListener());
         return v;
     }
 
@@ -50,7 +65,11 @@ public class Homescreen extends Fragment implements View.OnClickListener{
     int x;
     int y;
 
-    View.OnTouchListener touchListener = new View.OnTouchListener() {
+
+    private class touchListener implements View.OnTouchListener {
+        public touchListener(){
+            super();
+        }
         private GestureDetector gestureDetector = new GestureDetector(new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDoubleTap(MotionEvent e) {

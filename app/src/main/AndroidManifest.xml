@@ -26,6 +26,10 @@
         </activity>
         <activity android:name="shaun.home.AppDrawer"
             android:launchMode="singleTask" >
+            <intent-filter>
+                <action android:name="android.intent.action.ALL_APPS" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
         <!--<intent-filter>-->
             <!--<action android:name="android.intent.action.VIEW" />-->

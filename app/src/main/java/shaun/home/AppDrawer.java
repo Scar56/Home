@@ -36,6 +36,8 @@ public class AppDrawer extends AppCompatActivity {
         @Override
         protected String doInBackground(Void... Params) {
 
+            PackageManager pm = getPackageManager();
+
             Intent i = new Intent(Intent.ACTION_MAIN, null);
             i.addCategory(Intent.CATEGORY_LAUNCHER);
 
@@ -45,7 +47,7 @@ public class AppDrawer extends AppCompatActivity {
                 app.label = ri.loadLabel(pm);
                 app.packageName = ri.activityInfo.packageName;
                 app.icon = ri.activityInfo.loadIcon(pm);
-                adapter.appsList.add(app);
+                adapter.addItem(app);
             }
             Collections.sort(adapter.appsList,new Comparator<AppInfo>(){
                 public int compare(AppInfo one, AppInfo two) {

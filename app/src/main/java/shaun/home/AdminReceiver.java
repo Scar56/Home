@@ -1,14 +1,11 @@
 package shaun.home;
 
-import android.app.Activity;
-import android.app.Application;
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.PowerManager;
-import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
 import android.widget.Toast;
 
@@ -39,6 +36,7 @@ public class AdminReceiver extends DeviceAdminReceiver {
                 new Intent(ACTION_ENABLED));
     }
     public void lock() {
+
         PowerManager pm = (PowerManager) c.getSystemService(Context.POWER_SERVICE);
         if (pm.isInteractive()) {
             DevicePolicyManager policy = (DevicePolicyManager)
