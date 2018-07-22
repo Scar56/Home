@@ -3,6 +3,7 @@ package shaun.home;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
@@ -101,7 +102,7 @@ public class RAdapter extends RecyclerView.Adapter<RAdapter.ViewHolder> {
 
 
     @Override
-    public RAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RAdapter.ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
 
         //This is what adds the code we've written in here to our target view
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
@@ -114,6 +115,14 @@ public class RAdapter extends RecyclerView.Adapter<RAdapter.ViewHolder> {
                 ClipData.Item item = new ClipData.Item((CharSequence)appsList.get((int)view.findViewById(R.id.textView).getTag()).packageName);
                 String[] mimeTypes = {ClipDescription.MIMETYPE_TEXT_PLAIN};
                 view.startDragAndDrop(new ClipData(((TextView)view.findViewById(R.id.textView)).getText(),mimeTypes, item), new View.DragShadowBuilder(view.findViewById(R.id.img)),null,0);
+                Context context = view.getContext();
+                while (context instanceof ContextWrapper) {
+                    if (context instanceof AppDrawer) {
+                        break;
+                    }
+                    context = ((ContextWrapper)context).getBaseContext();
+                }
+                ((AppDrawer) context).inflateDrop(parent);
                 return true;
             }
         });
