@@ -40,20 +40,25 @@ public class CornerAdapter  extends BaseAdapter {
             case "UL":
                 ymod = 1;
                 xmod= -1;
+                break;
             case "UR":
                 ymod = 1;
                 xmod= 1;
+                break;
             case "LL":
                 ymod = -1;
                 xmod= -1;
+                break;
             case "LR":
                 ymod = -1;
                 xmod= 1;
+                break;
         }
     }
     @Override
     public int getCount(){
-        return homeInf.getContext().getSharedPreferences("corners", Context.MODE_PRIVATE).getInt("LR", 1);
+//        return homeInf.getContext().getSharedPreferences("corners", Context.MODE_PRIVATE).getInt("LR", 5);
+    return 5;
     }
 
     @Override
@@ -89,7 +94,8 @@ public class CornerAdapter  extends BaseAdapter {
             }
         });
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) homeLay.getLayoutParams();
-        params.setMargins(Math.max(0,(position+1)*40*xmod), Math.max(0,0*xmod),Math.max(0,0 *-xmod),Math.max(0,(position+1)*100*-ymod));
+        params.setMargins(0, Math.max((getCount()-position)*200*-ymod,(position)*200*ymod),0,0);
+        params.setMarginStart(Math.max((position)*200*xmod,(getCount()-position-1)*200*-xmod));
         homeLay.setLayoutParams(params);
         return homeLay;
     }

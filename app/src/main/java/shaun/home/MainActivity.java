@@ -72,13 +72,23 @@ public class MainActivity extends AppCompatActivity{
 //            public void onPageScrolled(int p1[], float p2, int p3) {
 //                WallpaperManager.getInstance(getBaseContext()).setWallpaperOffsets(mPager.getWindowToken(), (p1[0]+p2) / (2), 0);
 //            }});
-        ImageButton button = (ImageButton) findViewById(R.id.LRButton);
-        button.setOnClickListener(new CornerListener());
+        ImageButton ULButton = (ImageButton) findViewById(R.id.ULButton);
+        ULButton.setOnClickListener(new CornerListener("UL"));
+
+        ImageButton URButton = (ImageButton) findViewById(R.id.URButton);
+        URButton.setOnClickListener(new CornerListener("UR"));
+
+        ImageButton LLButton = (ImageButton) findViewById(R.id.LLButton);
+        LLButton.setOnClickListener(new CornerListener("LL"));
+
+        ImageButton LRButton = (ImageButton) findViewById(R.id.LRButton);
+        LRButton.setOnClickListener(new CornerListener("LR"));
     }
     private class CornerListener implements View.OnClickListener {
-        public CornerListener(){
+        private String cornerLabel;
+        public CornerListener(String corner){
             super();
-
+            cornerLabel=corner;
         }
         @Override
         public void onClick(View v) {
@@ -100,9 +110,6 @@ public class MainActivity extends AppCompatActivity{
 //                corner.setId(id);
                 //add it to the main view
                 main.addView(corner);
-                //change images
-                ((ImageView) findViewById(R.id.imageView2)).setImageDrawable(MainActivity.getActivityIcon(getBaseContext(), "com.android.chrome", "com.google.android.apps.chrome.Main"));
-                ((ImageView) findViewById(R.id.imageView3)).setImageDrawable(MainActivity.getActivityIcon(getBaseContext(), "com.android.chrome", "com.google.android.apps.chrome.Main"));
 
 //                DisplayMetrics displayMetrics = new DisplayMetrics();
 //                getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
@@ -112,19 +119,31 @@ public class MainActivity extends AppCompatActivity{
                 //set position
                 CircularLayout cornerView = findViewById(R.id.corner);
                 RelativeLayout.LayoutParams cLayParam = (RelativeLayout.LayoutParams) cornerView.getLayoutParams();
-                cLayParam.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-                cLayParam.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+                switch (cornerLabel){
+                    case "UL":
+                        cLayParam.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+                        cLayParam.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+                        break;
+                    case "UR":
+                        cLayParam.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+                        cLayParam.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+                        break;
+                    case "LL":
+                        cLayParam.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                        cLayParam.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+                        break;
+                    case "LR":
+                        cLayParam.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                        cLayParam.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+                        break;
+                }
                 cornerView.setLayoutParams(cLayParam);
-                cornerView.setAdapter(new CornerAdapter(getBaseContext(),"LR"));
+                cornerView.setAdapter(new CornerAdapter(getBaseContext(),cornerLabel));
 
             }
         }
 
 
-    }
-
-    public void cornerClick(View view){
-        view.getY();
     }
 
     public void appDrawerClick(View view){
