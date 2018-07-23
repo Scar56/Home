@@ -16,7 +16,10 @@ package shaun.home;
     along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+import android.app.Activity;
 import android.app.WallpaperManager;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -25,6 +28,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.GridView;
 
 /**
@@ -87,10 +91,9 @@ public class Homescreen extends Fragment implements View.OnClickListener{
                 x=(int) event.getX();
                 y=(int) event.getY();
             }
-            //TODO differentiate swipe from touch
             if (event.getAction() == MotionEvent.ACTION_UP) {
                 v.performClick();
-//                if(x==(int) event.getX()&&y==(int) event.getY())
+                if(Math.abs(x-(int) event.getX())<50&&Math.abs(y-(int) event.getY())<50)
                     WallpaperManager.getInstance(v.getContext()).sendWallpaperCommand(v.getWindowToken(), WallpaperManager.COMMAND_TAP,x,y+50,0,new Bundle());
             }
 
