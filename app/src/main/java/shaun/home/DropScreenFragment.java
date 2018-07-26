@@ -17,21 +17,52 @@ package shaun.home;
 */
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 
 /**
  * A placeholder fragment containing a simple view.
  */
 public class DropScreenFragment extends Fragment {
-
+    public enum corner {UL,UR,LL,LR}
     public DropScreenFragment() {
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_drop_screen, container, false);
+        RelativeLayout drop = (RelativeLayout)inflater.inflate(R.layout.fragment_drop_screen, container, false);
+        for (corner x:corner.values()
+             ) {
+            CircularLayout crnr = (CircularLayout) inflater.inflate(R.layout.corner, null);
+            crnr.setAdapter(new DropScreenAdapter(inflater.getContext(),x.toString()));
+            RelativeLayout.LayoutParams cLayParam = new RelativeLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+            switch (x.toString()){
+                case "UL":
+                    cLayParam.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+                    cLayParam.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+                    break;
+                case "UR":
+                    cLayParam.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+                    cLayParam.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+                    break;
+                case "LL":
+                    cLayParam.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                    cLayParam.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+                    break;
+                case "LR":
+                    cLayParam.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                    cLayParam.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+                    break;
+            }
+            crnr.setLayoutParams(cLayParam);
+            drop.addView(crnr);
+        }
+        return drop;
     }
 }

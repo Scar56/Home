@@ -29,10 +29,10 @@ import android.widget.TextView;
 
 public class CornerAdapter  extends BaseAdapter {
     private LayoutInflater homeInf;
-    private String name;
+    protected String name;
     //used for code reusability of corners
-    private int ymod;
-    private int xmod;
+    protected int ymod;
+    protected int xmod;
     public CornerAdapter(Context c, String name){
         homeInf = LayoutInflater.from(c);
         this.name = name;
@@ -94,7 +94,7 @@ public class CornerAdapter  extends BaseAdapter {
             }
         });
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) homeLay.getLayoutParams();
-        params.setMargins(0, Math.max((getCount()-position)*200*-ymod,(position)*200*ymod),0,0);
+        params.setMargins(0, Math.max((getCount()-position-1)*200*-ymod,(position)*200*ymod),0,0);
         params.setMarginStart(Math.max((position)*200*xmod,(getCount()-position-1)*200*-xmod));
         homeLay.setLayoutParams(params);
         return homeLay;
