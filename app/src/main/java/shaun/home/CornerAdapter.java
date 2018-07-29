@@ -72,7 +72,7 @@ public class CornerAdapter  extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         RelativeLayout homeLay = (RelativeLayout)homeInf.inflate
                 (R.layout.home_app, parent, false);
 
@@ -89,7 +89,7 @@ public class CornerAdapter  extends BaseAdapter {
                 v.getTag();
                 RelativeLayout main = ((RelativeLayout) v.getRootView().findViewById(R.id.main_activity));
                 main.removeView(v.getRootView().findViewById(R.id.corner));
-                Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage("com.android.chrome");
+                Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(context.getSharedPreferences(name, Context.MODE_PRIVATE).getString(Integer.toString(position), "com.android.chrome"));
                 context.startActivity(launchIntent);
             }
         });

@@ -17,6 +17,7 @@ package shaun.home;
 */
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -83,7 +84,7 @@ public class AppDrawer extends AppCompatActivity {
         }
 
     }
-    public void inflateDrop(ViewGroup container){
+    public void inflateDrop(){
         ((ConstraintLayout)findViewById(R.id.appDrawer)).addView(getLayoutInflater().inflate(R.layout.content_drop_screen, null));
         Fragment dropFragment = new DropScreenFragment();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();

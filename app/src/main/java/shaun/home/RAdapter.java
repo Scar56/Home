@@ -7,11 +7,13 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
+import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -122,7 +124,54 @@ public class RAdapter extends RecyclerView.Adapter<RAdapter.ViewHolder> {
                     }
                     context = ((ContextWrapper)context).getBaseContext();
                 }
-                ((AppDrawer) context).inflateDrop(parent);
+                ((AppDrawer) context).inflateDrop();
+                return true;
+            }
+        });
+        view.setOnDragListener(new View.OnDragListener(){
+            public boolean onDrag(View v, DragEvent event) {
+                switch(event.getAction()) {
+                    case DragEvent.ACTION_DRAG_STARTED:
+    //                    layoutParams = (RelativeLayout.LayoutParams)v.getLayoutParams();
+    //                    Log.d(msg, "Action is DragEvent.ACTION_DRAG_STARTED");
+
+                        // Do nothing
+                        break;
+
+                    case DragEvent.ACTION_DRAG_ENTERED:
+    //                    Log.d(msg, "Action is DragEvent.ACTION_DRAG_ENTERED");
+                        int x_cord = (int) event.getX();
+                        int y_cord = (int) event.getY();
+                        break;
+
+                    case DragEvent.ACTION_DRAG_EXITED :
+    //                    Log.d(msg, "Action is DragEvent.ACTION_DRAG_EXITED");
+                        x_cord = (int) event.getX();
+                        y_cord = (int) event.getY();
+    //                    layoutParams.leftMargin = x_cord;
+    //                    layoutParams.topMargin = y_cord;
+    //                    v.setLayoutParams(layoutParams);
+                        break;
+
+                    case DragEvent.ACTION_DRAG_LOCATION  :
+    //                    Toast.makeText(v.getContext(), "location", Toast.LENGTH_LONG).show();
+                        x_cord = (int) event.getX();
+                        y_cord = (int) event.getY();
+                        break;
+
+                    case DragEvent.ACTION_DRAG_ENDED   :
+//                        Toast.makeText(v.getContext(), "ended", Toast.LENGTH_LONG).show();
+
+                        // Do nothing
+                        break;
+
+                    case DragEvent.ACTION_DROP:
+//                        Toast.makeText(v.getContext(), "heyyy", Toast.LENGTH_LONG).show();
+
+                        // Do nothing
+                        break;
+                    default: break;
+                }
                 return true;
             }
         });
