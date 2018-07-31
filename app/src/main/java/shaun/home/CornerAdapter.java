@@ -19,6 +19,9 @@ package shaun.home;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -73,13 +76,27 @@ public class CornerAdapter  extends BaseAdapter {
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
+        Context c = homeInf.getContext();
         RelativeLayout homeLay = (RelativeLayout)homeInf.inflate
                 (R.layout.home_app, parent, false);
 
+        final String _package = c.getSharedPreferences(name, Context.MODE_PRIVATE).getString(Integer.toString(position), "com.android.chrome");
+
+        PackageManager pm = c.getPackageManager();
         ImageView Icon = homeLay.findViewById(R.id.icon);
-        Icon.setImageDrawable(MainActivity.getActivityIcon(homeInf.getContext(), "com.android.chrome", "com.google.android.apps.chrome.Main"));
         TextView text = homeLay.findViewById(R.id.title);
-        text.setText("Chrome");
+        try {
+
+            Drawable icon = pm.getApplicationIcon(_package);
+            Icon.setImageDrawable(icon);
+
+            ApplicationInfo app = pm.getApplicationInfo(_package, 0);
+            text.setText(pm.getApplicationLabel(app).toString());
+
+        }
+        catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
         //set position as tag
         homeLay.setTag(position);
         homeLay.setOnClickListener(new View.OnClickListener() {
@@ -89,7 +106,7 @@ public class CornerAdapter  extends BaseAdapter {
                 v.getTag();
                 RelativeLayout main = ((RelativeLayout) v.getRootView().findViewById(R.id.main_activity));
                 main.removeView(v.getRootView().findViewById(R.id.corner));
-                Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(context.getSharedPreferences(name, Context.MODE_PRIVATE).getString(Integer.toString(position), "com.android.chrome"));
+                Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(_package);
                 context.startActivity(launchIntent);
             }
         });

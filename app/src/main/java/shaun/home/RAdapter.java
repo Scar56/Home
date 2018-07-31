@@ -128,53 +128,42 @@ public class RAdapter extends RecyclerView.Adapter<RAdapter.ViewHolder> {
                 return true;
             }
         });
-        view.setOnDragListener(new View.OnDragListener(){
-            public boolean onDrag(View v, DragEvent event) {
-                switch(event.getAction()) {
-                    case DragEvent.ACTION_DRAG_STARTED:
-    //                    layoutParams = (RelativeLayout.LayoutParams)v.getLayoutParams();
-    //                    Log.d(msg, "Action is DragEvent.ACTION_DRAG_STARTED");
-
-                        // Do nothing
-                        break;
-
-                    case DragEvent.ACTION_DRAG_ENTERED:
-    //                    Log.d(msg, "Action is DragEvent.ACTION_DRAG_ENTERED");
-                        int x_cord = (int) event.getX();
-                        int y_cord = (int) event.getY();
-                        break;
-
-                    case DragEvent.ACTION_DRAG_EXITED :
-    //                    Log.d(msg, "Action is DragEvent.ACTION_DRAG_EXITED");
-                        x_cord = (int) event.getX();
-                        y_cord = (int) event.getY();
-    //                    layoutParams.leftMargin = x_cord;
-    //                    layoutParams.topMargin = y_cord;
-    //                    v.setLayoutParams(layoutParams);
-                        break;
-
-                    case DragEvent.ACTION_DRAG_LOCATION  :
-    //                    Toast.makeText(v.getContext(), "location", Toast.LENGTH_LONG).show();
-                        x_cord = (int) event.getX();
-                        y_cord = (int) event.getY();
-                        break;
-
-                    case DragEvent.ACTION_DRAG_ENDED   :
-//                        Toast.makeText(v.getContext(), "ended", Toast.LENGTH_LONG).show();
-
-                        // Do nothing
-                        break;
-
-                    case DragEvent.ACTION_DROP:
-//                        Toast.makeText(v.getContext(), "heyyy", Toast.LENGTH_LONG).show();
-
-                        // Do nothing
-                        break;
-                    default: break;
-                }
-                return true;
-            }
-        });
+//        view.setOnDragListener(new View.OnDragListener(){
+//            public boolean onDrag(View v, DragEvent event) {
+//                switch(event.getAction()) {
+//                    case DragEvent.ACTION_DRAG_STARTED:
+//                        break;
+//
+//                    case DragEvent.ACTION_DRAG_ENTERED:
+//                        int x_cord = (int) event.getX();
+//                        int y_cord = (int) event.getY();
+//                        break;
+//
+//                    case DragEvent.ACTION_DRAG_EXITED :
+//                        x_cord = (int) event.getX();
+//                        y_cord = (int) event.getY();
+//    //                    layoutParams.leftMargin = x_cord;
+//    //                    layoutParams.topMargin = y_cord;
+//    //                    v.setLayoutParams(layoutParams);
+//                        break;
+//
+//                    case DragEvent.ACTION_DRAG_LOCATION  :
+//                        x_cord = (int) event.getX();
+//                        y_cord = (int) event.getY();
+//                        break;
+//
+//                    case DragEvent.ACTION_DRAG_ENDED   :
+//                        // Do nothing
+//                        break;
+//
+//                    case DragEvent.ACTION_DROP:
+//                        // Do nothing
+//                        break;
+//                    default: break;
+//                }
+//                return true;
+//            }
+//        });
 
         ViewHolder viewHolder = new ViewHolder(view);
         return viewHolder;
