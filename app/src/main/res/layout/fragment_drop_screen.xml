@@ -5,5 +5,7 @@
     android:name="shaun.home.DropScreenFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/drop_screen">
+    android:id="@+id/drop_screen"
+    android:background="#ffffffff"
+    android:theme="@style/AppTheme">
 </RelativeLayout>

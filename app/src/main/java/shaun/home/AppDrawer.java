@@ -17,7 +17,6 @@ package shaun.home;
 */
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -27,7 +26,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.ViewGroup;
 import android.view.Window;
 
 import java.util.Collections;
@@ -46,6 +44,8 @@ public class AppDrawer extends AppCompatActivity {
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.app_drawer);
+
+        //TODO move this to a new fragment
         ((RecyclerView)findViewById(R.id.appsList)).setAdapter(adapter);
         ((RecyclerView)findViewById(R.id.appsList)).setLayoutManager(new LinearLayoutManager(this));
 
@@ -84,7 +84,12 @@ public class AppDrawer extends AppCompatActivity {
         }
 
     }
+
+    /**
+     * inflate the view to drop apps into
+     */
     public void inflateDrop(){
+        //add a container for the fragment
         ((ConstraintLayout)findViewById(R.id.appDrawer)).addView(getLayoutInflater().inflate(R.layout.content_drop_screen, null));
         Fragment dropFragment = new DropScreenFragment();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();

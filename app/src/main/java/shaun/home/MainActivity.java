@@ -27,35 +27,30 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.GestureDetector.OnGestureListener;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 public class MainActivity extends AppCompatActivity{
     WallpaperManager wm;
     public static int currentTapped = 0;
     public int viewID = R.id.corner;
-    private OnGestureListener gestureScanner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //create window
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
-
-        this.getSharedPreferences("screens", MODE_PRIVATE).edit().putInt("horiz",3).apply();
-        this.getSharedPreferences("corners", MODE_PRIVATE).edit().putInt("LR",1).apply();
 
         //TODO vertical pages
         final ViewPager mPager = (ViewPager) findViewById(R.id.homescreenPager);
         FragmentStatePagerAdapter mPagerAdapter = new HomescreenAdapter(this, getSupportFragmentManager());
         mPager.setAdapter(mPagerAdapter);
 
+        //setup wallpaper scrolling
         wm = WallpaperManager.getInstance(this);
         wm.setWallpaperOffsetSteps(.5f,-1f);
 
@@ -72,49 +67,57 @@ public class MainActivity extends AppCompatActivity{
 //            public void onPageScrolled(int p1[], float p2, int p3) {
 //                WallpaperManager.getInstance(getBaseContext()).setWallpaperOffsets(mPager.getWindowToken(), (p1[0]+p2) / (2), 0);
 //            }});
+
+        //set buttons in corners
         ImageButton ULButton = (ImageButton) findViewById(R.id.ULButton);
-        ULButton.setOnClickListener(new CornerListener("UL"));
+        ULButton.setOnClickListener(new CornerListener(corner.UL));
 
         ImageButton URButton = (ImageButton) findViewById(R.id.URButton);
-        URButton.setOnClickListener(new CornerListener("UR"));
+        URButton.setOnClickListener(new CornerListener(corner.UR));
 
         ImageButton LLButton = (ImageButton) findViewById(R.id.LLButton);
-        LLButton.setOnClickListener(new CornerListener("LL"));
+        LLButton.setOnClickListener(new CornerListener(corner.LL));
 
         ImageButton LRButton = (ImageButton) findViewById(R.id.LRButton);
-        LRButton.setOnClickListener(new CornerListener("LR"));
+        LRButton.setOnClickListener(new CornerListener(corner.LR));
     }
+
+    /**
+     * Listener for menu clicks in home screen corners
+     */
     private class CornerListener implements View.OnClickListener {
         private String cornerLabel;
-        public CornerListener(String corner){
+
+        /**
+         * constructor
+         * @param corner the name (and position) of the button the listener is being applied to
+         */
+        public CornerListener(corner corner){
             super();
-            cornerLabel=corner;
+            cornerLabel=corner.toString();
         }
         @Override
         public void onClick(View v) {
             RelativeLayout main = ((RelativeLayout) findViewById(R.id.main_activity));
+            //if there is an open corner menu already, remove it
             int temp = currentTapped;
             if(currentTapped!=0){
                 currentTapped=0;
                 main.removeView(findViewById(viewID));
             }
+
+            //dont reopen the corner we just closed
             if(temp != v.getId()) {
+                //set new opened corner
                 currentTapped = v.getId();
+
                 //create new corner layout
                 LayoutInflater inflater = LayoutInflater
                         .from(getApplicationContext());
                 CircularLayout corner = (CircularLayout) inflater.inflate(R.layout.corner, null);
-                //give it an id
-//                int id = View.generateViewId();
-//                viewID = id;
-//                corner.setId(id);
+
                 //add it to the main view
                 main.addView(corner);
-
-//                DisplayMetrics displayMetrics = new DisplayMetrics();
-//                getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-//                int width = displayMetrics.widthPixels;
-//                int height = displayMetrics.heightPixels;
 
                 //set position
                 CircularLayout cornerView = findViewById(R.id.corner);
@@ -146,9 +149,17 @@ public class MainActivity extends AppCompatActivity{
 
     }
 
+    /**
+     * open the app drawer
+     * @param view the app drawer button clicked
+     */
     public void appDrawerClick(View view){
+        //remove any open corner view
+        ((RelativeLayout) findViewById(R.id.main_activity)).removeView(findViewById(viewID));
+        //open the drawer
         startActivity(new Intent(this, AppDrawer.class));
     }
+
 
     public static Drawable getActivityIcon(Context context, String packageName, String activityName) {
         PackageManager pm = context.getPackageManager();

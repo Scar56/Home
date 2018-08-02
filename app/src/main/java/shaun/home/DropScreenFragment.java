@@ -23,11 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
-/**
- * A placeholder fragment containing a simple view.
- */
 public class DropScreenFragment extends Fragment {
-    public enum corner {UL,UR,LL,LR}
     public DropScreenFragment() {
     }
 
@@ -35,8 +31,7 @@ public class DropScreenFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         RelativeLayout drop = (RelativeLayout)inflater.inflate(R.layout.fragment_drop_screen, container, false);
-        for (corner x:corner.values()
-             ) {
+        for (corner x:corner.values()) {
             CircularLayout crnr = (CircularLayout) inflater.inflate(R.layout.corner, null);
             crnr.setAdapter(new DropScreenAdapter(inflater.getContext(),x.toString()));
             RelativeLayout.LayoutParams cLayParam = new RelativeLayout.LayoutParams(

@@ -17,6 +17,8 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import static android.content.Context.MODE_PRIVATE;
+
 public class RAdapter extends RecyclerView.Adapter<RAdapter.ViewHolder> {
     public ArrayList<AppInfo> appsList;
 
@@ -124,9 +126,36 @@ public class RAdapter extends RecyclerView.Adapter<RAdapter.ViewHolder> {
                     }
                     context = ((ContextWrapper)context).getBaseContext();
                 }
+                //TODO hmmmmm?
                 ((AppDrawer) context).inflateDrop();
                 return true;
             }
+        });
+        view.setOnDragListener(new View.OnDragListener(){
+            public boolean onDrag(View v, DragEvent event) {
+                Context context = v.getContext();
+                while (context instanceof ContextWrapper) {
+                    if (context instanceof AppDrawer) {
+                        break;
+                    }
+                    context = ((ContextWrapper)context).getBaseContext();
+                }
+
+                switch (event.getAction()) {
+                    case DragEvent.ACTION_DRAG_STARTED:
+                        //TODO hmmm??
+                        return true;
+                    case DragEvent.ACTION_DRAG_ENDED:
+
+                        //kill drawer
+                        ((AppDrawer) context).finish();
+                        return true;
+
+                    default:
+                        return true;
+                }
+            }
+
         });
 //        view.setOnDragListener(new View.OnDragListener(){
 //            public boolean onDrag(View v, DragEvent event) {
