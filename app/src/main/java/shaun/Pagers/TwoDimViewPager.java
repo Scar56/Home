@@ -1,4 +1,20 @@
-package shaun.home;
+/*
+ * Copyright (C) 2006 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package shaun.Pagers;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -18,10 +34,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.AbsSavedState;
 import android.support.v4.view.AccessibilityDelegateCompat;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.PagerTitleStrip;
 import android.support.v4.view.ViewCompat;
-import android.support.v4.view.ViewPager;
 import android.support.v4.view.WindowInsetsCompat;
 import android.support.v4.view.accessibility.AccessibilityEventCompat;
 import android.support.v4.view.accessibility.AccessibilityNodeInfoCompat;
@@ -52,50 +66,50 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class TwoDimViewPager extends ViewPager {
+public class TwoDimViewPager extends ViewGroup {
 
     public TwoDimViewPager(Context context) {
         super(context);
-        init();
+        initViewPager();
     }
 
     public TwoDimViewPager(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init();
+        initViewPager();
     }
 
-    private void init() {
-        // The majority of the magic happens here
-        setPageTransformer(true, new VerticalPageTransformer());
-        // The easiest way to get rid of the overscroll drawing that happens on the left and right
-        setOverScrollMode(OVER_SCROLL_NEVER);
-    }
+//    private void init() {
+//        // The majority of the magic happens here
+//        setPageTransformer(true, new VerticalPageTransformer());
+//        // The easiest way to get rid of the overscroll drawing that happens on the left and right
+//        setOverScrollMode(OVER_SCROLL_NEVER);
+//    }
 
-    private class VerticalPageTransformer implements ViewPager.PageTransformer {
-
-        @Override
-        public void transformPage(View view, float position) {
-
-            if (position < -1) { // [-Infinity,-1)
-                // This page is way off-screen to the left.
-                view.setAlpha(0);
-
-            } else if (position <= 1) { // [-1,1]
-                view.setAlpha(1);
-
-                // Counteract the default slide transition
-                view.setTranslationX(view.getWidth() * -position);
-
-                //set Y position to swipe in from top
-                float yPosition = position * view.getHeight();
-                view.setTranslationY(yPosition);
-
-            } else { // (1,+Infinity]
-                // This page is way off-screen to the right.
-                view.setAlpha(0);
-            }
-        }
-    }
+//    private class VerticalPageTransformer implements shaun.Pagers.TwoDimViewPager.PageTransformer {
+//
+//        @Override
+//        public void transformPage(View view, float position) {
+//
+//            if (position < -1) { // [-Infinity,-1)
+//                // This page is way off-screen to the left.
+//                view.setAlpha(0);
+//
+//            } else if (position <= 1) { // [-1,1]
+//                view.setAlpha(1);
+//
+//                // Counteract the default slide transition
+//                view.setTranslationX(view.getWidth() * -position);
+//
+//                //set Y position to swipe in from top
+//                float yPosition = position * view.getHeight();
+//                view.setTranslationY(yPosition);
+//
+//            } else { // (1,+Infinity]
+//                // This page is way off-screen to the right.
+//                view.setAlpha(0);
+//            }
+//        }
+//    }
 
     /**
      * Swaps the X and Y coordinates of your touch event.
@@ -344,22 +358,24 @@ public class TwoDimViewPager extends ViewPager {
                     final int scrollX = getScrollX();
                     final ItemInfo ii = infoForCurrentScrollPosition();
                     final float marginOffset = (float) mPageMargin / width;
-                    final int currentPage = ii.position;
+                    final int currentPage[] = ii.position;
                     final float pageOffset = (((float) scrollX / width) - ii.offset)
                             / (ii.widthFactor + marginOffset);
                     final int activePointerIndex = ev.findPointerIndex(mActivePointerId);
                     final float x = ev.getX(activePointerIndex);
-                    final int totalDelta = (int) (x - mInitialMotionX);
-                    int nextPage = determineTargetPage(currentPage, pageOffset, initialVelocity,
-                            totalDelta);
-                    setCurrentItemInternal(nextPage, true, true, initialVelocity);
+                    final float y = ev.getY(activePointerIndex);
+                    final int totalDeltaX = (int) (x - mInitialMotionX);
+                    final int totalDeltaY = (int) (y - mInitialMotionY);
+                    int nextPage[] = determineTargetPage(currentPage, pageOffset, initialVelocity,
+                            totalDeltaX, totalDeltaY);
+                    setCurrentItemInternal(nextPage[0], nextPage[1], true, true, initialVelocity);
 
                     needsInvalidate = resetTouch();
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
                 if (mIsBeingDragged) {
-                    scrollToItem(mCurItem, true, 0, false);
+                    scrollToItem(mCurItem, mCurItemV, true, 0, false);
                     needsInvalidate = resetTouch();
                 }
                 break;
@@ -373,6 +389,7 @@ public class TwoDimViewPager extends ViewPager {
             case MotionEvent.ACTION_POINTER_UP:
                 onSecondaryPointerUp(ev);
                 mLastMotionX = ev.getX(ev.findPointerIndex(mActivePointerId));
+                mLastMotionY = ev.getY(ev.findPointerIndex(mActivePointerId));
                 break;
         }
         if (needsInvalidate) {
@@ -381,18 +398,18 @@ public class TwoDimViewPager extends ViewPager {
         return true;
     }
 
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev){
-        boolean intercepted = super.onInterceptTouchEvent(swapXY(ev));
-        swapXY(ev);
-        // return touch coordinates to original reference frame for any child views
-        return intercepted;
-    }
+//    @Override
+//    public boolean onInterceptTouchEvent(MotionEvent ev){
+//        boolean intercepted = super.onInterceptTouchEvent(swapXY(ev));
+//        swapXY(ev);
+//        // return touch coordinates to original reference frame for any child views
+//        return intercepted;
+//    }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent ev) {
-        return super.onTouchEvent(swapXY(ev));
-    }
+//    @Override
+//    public boolean onTouchEvent(MotionEvent ev) {
+//        return super.onTouchEvent(swapXY(ev));
+//    }
 
 /**
  * Layout manager that allows the user to flip left and right
@@ -432,7 +449,7 @@ public class TwoDimViewPager extends ViewPager {
  * <p>You can find examples of using ViewPager in the API 4+ Support Demos and API 13+ Support Demos
  * sample code.
  */
-    private static final String TAG = "ViewPager";
+    private static final String TAG = "TwoDimViewPager";
     private static final boolean DEBUG = false;
 
     private static final boolean USE_CACHE = false;
@@ -457,16 +474,22 @@ public class TwoDimViewPager extends ViewPager {
 
     static class ItemInfo {
         Object object;
-        int position;
+        int[] position;  //[x,y]
         boolean scrolling;
         float widthFactor;
         float offset;
     }
 
-    private static final Comparator<ItemInfo> COMPARATOR = new Comparator<ItemInfo>(){
+    private static final Comparator<ItemInfo> COMPARATOR_X = new Comparator<ItemInfo>(){
         @Override
         public int compare(ItemInfo lhs, ItemInfo rhs) {
-            return lhs.position - rhs.position;
+            return lhs.position[0] - rhs.position[0];
+        }
+    };
+    private static final Comparator<ItemInfo> COMPARATOR_Y = new Comparator<ItemInfo>(){
+        @Override
+        public int compare(ItemInfo lhs, ItemInfo rhs) {
+            return lhs.position[1] - rhs.position[1];
         }
     };
 
@@ -478,7 +501,7 @@ public class TwoDimViewPager extends ViewPager {
         }
     };
 
-    private final ArrayList<ItemInfo> mItems = new ArrayList<ItemInfo>();
+    private final ArrayList<ArrayList<ItemInfo>> mItems = new ArrayList<>();
     private final ItemInfo mTempItem = new ItemInfo();
 
     private final Rect mTempRect = new Rect();
@@ -486,7 +509,7 @@ public class TwoDimViewPager extends ViewPager {
     PagerAdapter mAdapter;
     int mCurItem;   // Index of horizontal position currently displayed page.
     int mCurItemV;  //Index of vertical position of the currently displayed page
-    private int mRestoredCurItem = -1;
+    private int mRestoredCurItem[] = {-1,-1};
     private Parcelable mRestoredAdapterState = null;
     private ClassLoader mRestoredClassLoader = null;
 
@@ -558,6 +581,9 @@ public class TwoDimViewPager extends ViewPager {
     private EdgeEffect mLeftEdge;
     private EdgeEffect mRightEdge;
 
+    private EdgeEffect mTopEdge;
+    private EdgeEffect mBottomEdge;
+
     private boolean mFirstLayout = true;
     private boolean mNeedCalculatePageOffsets = false;
     private boolean mCalledSuper;
@@ -617,7 +643,7 @@ public class TwoDimViewPager extends ViewPager {
          * @param positionOffset Value from [0, 1) indicating the offset from the page at position.
          * @param positionOffsetPixels Value in pixels indicating the offset from position.
          */
-        void onPageScrolled(int position, float positionOffset, int positionOffsetPixels);
+        void onPageScrolled(int position[], float positionOffset, int positionOffsetPixels);
 
         /**
          * This method will be invoked when a new page becomes selected. Animation is not
@@ -625,7 +651,7 @@ public class TwoDimViewPager extends ViewPager {
          *
          * @param position Position index of the new selected page.
          */
-        void onPageSelected(int position);
+        void onPageSelected(int position[]);
 
         /**
          * Called when the scroll state changes. Useful for discovering when the user
@@ -647,12 +673,12 @@ public class TwoDimViewPager extends ViewPager {
      */
     public static class SimpleOnPageChangeListener implements OnPageChangeListener {
         @Override
-        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        public void onPageScrolled(int position[], float positionOffset, int positionOffsetPixels) {
             // This space for rent
         }
 
         @Override
-        public void onPageSelected(int position) {
+        public void onPageSelected(int position[]) {
             // This space for rent
         }
 
@@ -694,7 +720,7 @@ public class TwoDimViewPager extends ViewPager {
          * @param oldAdapter the previously set adapter
          * @param newAdapter the newly set adapter
          */
-        void onAdapterChanged(@NonNull android.support.v4.view.ViewPager viewPager,
+        void onAdapterChanged(@NonNull TwoDimViewPager viewPager,
                               @Nullable PagerAdapter oldAdapter, @Nullable PagerAdapter newAdapter);
     }
 
@@ -715,6 +741,7 @@ public class TwoDimViewPager extends ViewPager {
     }
 
     void initViewPager() {
+        mItems.add(new ArrayList<ItemInfo>());
         setWillNotDraw(false);
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
         setFocusable(true);
@@ -824,11 +851,11 @@ public class TwoDimViewPager extends ViewPager {
             mAdapter.setViewPagerObserver(null);
             mAdapter.startUpdate(this);
             for (int i = 0; i < mItems.size(); i++) {
-                final ItemInfo ii = mItems.get(i);
-                mAdapter.destroyItem(this, ii.position, ii.object);
+                final ItemInfo ii = mItems.get(i).get(0);
+                mAdapter.destroyItem(this, ii.position[0], ii.object);
             }
             mAdapter.finishUpdate(this);
-            mItems.clear();
+//            mItems.clear();
             removeNonDecorViews();
             mCurItem = 0;
             scrollTo(0, 0);
@@ -847,10 +874,11 @@ public class TwoDimViewPager extends ViewPager {
             final boolean wasFirstLayout = mFirstLayout;
             mFirstLayout = true;
             mExpectedAdapterCount = mAdapter.getCount();
-            if (mRestoredCurItem >= 0) {
+            if (mRestoredCurItem[0] >= 0) {
                 mAdapter.restoreState(mRestoredAdapterState, mRestoredClassLoader);
                 setCurrentItemInternal(mRestoredCurItem, false, true);
-                mRestoredCurItem = -1;
+                mRestoredCurItem[0] = -1;
+                mRestoredCurItem[1] = -1;
                 mRestoredAdapterState = null;
                 mRestoredClassLoader = null;
             } else if (!wasFirstLayout) {
@@ -890,13 +918,45 @@ public class TwoDimViewPager extends ViewPager {
     }
 
     /**
+     * Add a listener that will be invoked whenever the adapter for this ViewPager changes.
+     *
+     * @param listener listener to add
+     */
+    public void addOnAdapterChangeListener(@NonNull OnAdapterChangeListener listener) {
+        if (mAdapterChangeListeners == null) {
+            mAdapterChangeListeners = new ArrayList<>();
+        }
+        mAdapterChangeListeners.add(listener);
+    }
+
+    /**
+     * Remove a listener that was previously added via
+     * {@link #addOnAdapterChangeListener(OnAdapterChangeListener)}.
+     *
+     * @param listener listener to remove
+     */
+    public void removeOnAdapterChangeListener(@NonNull OnAdapterChangeListener listener) {
+        if (mAdapterChangeListeners != null) {
+            mAdapterChangeListeners.remove(listener);
+        }
+    }
+//
+    private int getClientWidth() {
+        return getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
+    }
+
+    private int getClientHeight() {
+        return getMeasuredHeight() - getPaddingBottom() - getPaddingTop();
+    }
+
+    /**
      * Set the currently selected page. If the ViewPager has already been through its first
      * layout with its current adapter there will be a smooth animated transition between
      * the current item and the specified item.
      *
      * @param item Item index to select
      */
-    public void setCurrentItem(int item) {
+    public void setCurrentItem(int[] item) {
         mPopulatePending = false;
         setCurrentItemInternal(item, !mFirstLayout, false);
     }
@@ -907,62 +967,69 @@ public class TwoDimViewPager extends ViewPager {
      * @param item Item index to select
      * @param smoothScroll True to smoothly scroll to the new item, false to transition immediately
      */
-    public void setCurrentItem(int item, boolean smoothScroll) {
+    public void setCurrentItem(int[] item, boolean smoothScroll) {
         mPopulatePending = false;
         setCurrentItemInternal(item, smoothScroll, false);
     }
 
-    public int getCurrentItem() {
-        return mCurItem;
+    public int[] getCurrentItem() {
+        return new int[] {mCurItem,mCurItemV};
     }
 
-    void setCurrentItemInternal(int item, boolean smoothScroll, boolean always) {
-        setCurrentItemInternal(item, smoothScroll, always, 0);
+    void setCurrentItemInternal(int[] item, boolean smoothScroll, boolean always) {
+        setCurrentItemInternal(item[0], item[1], smoothScroll, always, 0);
     }
 
-    void setCurrentItemInternal(int item, boolean smoothScroll, boolean always, int velocity) {
+    void setCurrentItemInternal(int itemX, int itemY, boolean smoothScroll, boolean always, int velocity) {
         if (mAdapter == null || mAdapter.getCount() <= 0) {
             setScrollingCacheEnabled(false);
             return;
         }
-        if (!always && mCurItem == item && mItems.size() != 0) {
+        if (!always && mCurItem == itemX && mCurItemV == itemY && mItems.get(0).size() != 0) {
             setScrollingCacheEnabled(false);
             return;
         }
 
-        if (item < 0) {
-            item = 0;
-        } else if (item >= mAdapter.getCount()) {
-            item = mAdapter.getCount() - 1;
+        if (itemX < 0) {
+            itemX = 0;
+        } else if (itemX >= mAdapter.getCount()) {
+            itemX = mAdapter.getCount() - 1;
+        }
+        if (itemY < 0) {
+            itemY = 0;
+        }
+        //TODO getCount 2d
+        else if (itemY >= mAdapter.getCount()) {
+            itemY = mAdapter.getCount() - 1;
         }
         final int pageLimit = mOffscreenPageLimit;
-        if (item > (mCurItem + pageLimit) || item < (mCurItem - pageLimit)) {
+        if (itemX > (mCurItem + pageLimit) || itemX < (mCurItem - pageLimit)) {
             // We are doing a jump by more than one page.  To avoid
             // glitches, we want to keep all current pages in the view
             // until the scroll ends.
-            for (int i = 0; i < mItems.size(); i++) {
-                mItems.get(i).scrolling = true;
+            for (int i = 0; i < mItems.get(0).size(); i++) {
+                mItems.get(0).get(i).scrolling = true;
             }
         }
-        final boolean dispatchSelected = mCurItem != item;
+        final boolean dispatchSelected = mCurItem != itemX;
 
         if (mFirstLayout) {
             // We don't have any idea how big we are yet and shouldn't have any pages either.
             // Just set things up and let the pending layout handle things.
-            mCurItem = item;
+            mCurItem = itemX;
             if (dispatchSelected) {
-                dispatchOnPageSelected(item);
+                dispatchOnPageSelected(new int[] {itemX,itemY});
             }
             requestLayout();
         } else {
-            populate(item);
-            scrollToItem(item, smoothScroll, velocity, dispatchSelected);
+            populate(itemX);
+            scrollToItem(itemX, itemY, smoothScroll, velocity, dispatchSelected);
         }
     }
 
-    private void scrollToItem(int item, boolean smoothScroll, int velocity,
+    private void scrollToItem(int itemX, int itemY, boolean smoothScroll, int velocity,
                               boolean dispatchSelected) {
-        final ItemInfo curInfo = infoForPosition(item);
+        final ItemInfo curInfo = infoForPosition(itemX,itemY);
         int destX = 0;
         if (curInfo != null) {
             final int width = getClientWidth();
@@ -972,15 +1039,67 @@ public class TwoDimViewPager extends ViewPager {
         if (smoothScroll) {
             smoothScrollTo(destX, 0, velocity);
             if (dispatchSelected) {
-                dispatchOnPageSelected(item);
+                dispatchOnPageSelected(new int[] {itemX,itemY});
             }
         } else {
             if (dispatchSelected) {
-                dispatchOnPageSelected(item);
+                dispatchOnPageSelected(new int[] {itemX,itemY});
             }
             completeScroll(false);
             scrollTo(destX, 0);
             pageScrolled(destX);
+        }
+    }
+
+//    /**
+//     * Set a listener that will be invoked whenever the page changes or is incrementally
+//     * scrolled. See {@link OnPageChangeListener}.
+//     *
+//     * @param listener Listener to set
+//     *
+//     * @deprecated Use {@link #addOnPageChangeListener(OnPageChangeListener)}
+//     * and {@link #removeOnPageChangeListener(OnPageChangeListener)} instead.
+//     */
+//    @Deprecated
+//    public void setOnPageChangeListener(OnPageChangeListener listener) {
+//        mOnPageChangeListener = listener;
+//    }
+//
+    /**
+     * Add a listener that will be invoked whenever the page changes or is incrementally
+     * scrolled. See {@link OnPageChangeListener}.
+     *
+     * <p>Components that add a listener should take care to remove it when finished.
+     * Other components that take ownership of a view may call {@link #clearOnPageChangeListeners()}
+     * to remove all attached listeners.</p>
+     *
+     * @param listener listener to add
+     */
+    public void addOnPageChangeListener(@NonNull OnPageChangeListener listener) {
+        if (mOnPageChangeListeners == null) {
+            mOnPageChangeListeners = new ArrayList<>();
+        }
+        mOnPageChangeListeners.add(listener);
+    }
+
+    /**
+     * Remove a listener that was previously added via
+     * {@link #addOnPageChangeListener(OnPageChangeListener)}.
+     *
+     * @param listener listener to remove
+     */
+    public void removeOnPageChangeListener(@NonNull OnPageChangeListener listener) {
+        if (mOnPageChangeListeners != null) {
+            mOnPageChangeListeners.remove(listener);
+        }
+    }
+
+    /**
+     * Remove all listeners that are notified of any changes in scroll state or position.
+     */
+    public void clearOnPageChangeListeners() {
+        if (mOnPageChangeListeners != null) {
+            mOnPageChangeListeners.clear();
         }
     }
 
@@ -1243,13 +1362,13 @@ public class TwoDimViewPager extends ViewPager {
 
     ItemInfo addNewItem(int position, int index) {
         ItemInfo ii = new ItemInfo();
-        ii.position = position;
+        ii.position = new int[] {position,0};
         ii.object = mAdapter.instantiateItem(this, position);
         ii.widthFactor = mAdapter.getPageWidth(position);
-        if (index < 0 || index >= mItems.size()) {
-            mItems.add(ii);
+        if (index < 0 || index >= mItems.get(0).size()) {
+            mItems.get(0).add(ii);
         } else {
-            mItems.add(index, ii);
+            mItems.get(0).set(index, ii);
         }
         return ii;
     }
@@ -1261,11 +1380,11 @@ public class TwoDimViewPager extends ViewPager {
         mExpectedAdapterCount = adapterCount;
         boolean needPopulate = mItems.size() < mOffscreenPageLimit * 2 + 1
                 && mItems.size() < adapterCount;
-        int newCurrItem = mCurItem;
+        int newCurrItem[] = {mCurItem,mCurItemV};
 
         boolean isUpdating = false;
         for (int i = 0; i < mItems.size(); i++) {
-            final ItemInfo ii = mItems.get(i);
+            final ItemInfo ii = mItems.get(0).get(i);
             final int newPos = mAdapter.getItemPosition(ii.object);
 
             if (newPos == PagerAdapter.POSITION_UNCHANGED) {
@@ -1281,24 +1400,25 @@ public class TwoDimViewPager extends ViewPager {
                     isUpdating = true;
                 }
 
-                mAdapter.destroyItem(this, ii.position, ii.object);
+                mAdapter.destroyItem(this, ii.position[0], ii.object);
                 needPopulate = true;
 
-                if (mCurItem == ii.position) {
+                if (mCurItem == ii.position[0] && mCurItemV==ii.position[1]) {
                     // Keep the current item in the valid range
-                    newCurrItem = Math.max(0, Math.min(mCurItem, adapterCount - 1));
+                    newCurrItem[0] = Math.max(0, Math.min(mCurItem, adapterCount - 1));
+                    newCurrItem[1] = Math.max(0, Math.min(mCurItemV, adapterCount - 1));
                     needPopulate = true;
                 }
                 continue;
             }
 
-            if (ii.position != newPos) {
-                if (ii.position == mCurItem) {
+            if (ii.position[0] != newPos) {
+                if (mCurItem == ii.position[0] && mCurItemV==ii.position[1]) {
                     // Our current item changed position. Follow it.
-                    newCurrItem = newPos;
+                    newCurrItem[0] = newPos;
                 }
 
-                ii.position = newPos;
+                ii.position[0] = newPos;
                 needPopulate = true;
             }
         }
@@ -1307,7 +1427,7 @@ public class TwoDimViewPager extends ViewPager {
             mAdapter.finishUpdate(this);
         }
 
-        Collections.sort(mItems, COMPARATOR);
+        Collections.sort(mItems.get(0), COMPARATOR_X);
 
         if (needPopulate) {
             // Reset our known page widths; populate will recompute them.
@@ -1332,7 +1452,7 @@ public class TwoDimViewPager extends ViewPager {
     void populate(int newCurrentItem) {
         ItemInfo oldCurInfo = null;
         if (mCurItem != newCurrentItem) {
-            oldCurInfo = infoForPosition(mCurItem);
+            oldCurInfo = infoForPosition(mCurItem, mCurItemV);
             mCurItem = newCurrentItem;
         }
 
@@ -1383,10 +1503,10 @@ public class TwoDimViewPager extends ViewPager {
         // Locate the currently focused item or add it if needed.
         int curIndex = -1;
         ItemInfo curItem = null;
-        for (curIndex = 0; curIndex < mItems.size(); curIndex++) {
-            final ItemInfo ii = mItems.get(curIndex);
-            if (ii.position >= mCurItem) {
-                if (ii.position == mCurItem) curItem = ii;
+        for (curIndex = 0; curIndex < mItems.get(0).size(); curIndex++) {
+            final ItemInfo ii = mItems.get(0).get(curIndex);
+            if (ii.position[0] >= mCurItem) {
+                if (ii.position[0] == mCurItem) curItem = ii;
                 break;
             }
         }
@@ -1401,7 +1521,7 @@ public class TwoDimViewPager extends ViewPager {
         if (curItem != null) {
             float extraWidthLeft = 0.f;
             int itemIndex = curIndex - 1;
-            ItemInfo ii = itemIndex >= 0 ? mItems.get(itemIndex) : null;
+            ItemInfo ii = itemIndex >= 0 ? mItems.get(0).get(itemIndex) : null;
             final int clientWidth = getClientWidth();
             final float leftWidthNeeded = clientWidth <= 0 ? 0 :
                     2.f - curItem.widthFactor + (float) getPaddingLeft() / (float) clientWidth;
@@ -1410,7 +1530,7 @@ public class TwoDimViewPager extends ViewPager {
                     if (ii == null) {
                         break;
                     }
-                    if (pos == ii.position && !ii.scrolling) {
+                    if (pos == ii.position[0] && !ii.scrolling) {
                         mItems.remove(itemIndex);
                         mAdapter.destroyItem(this, pos, ii.object);
                         if (DEBUG) {
@@ -1419,24 +1539,24 @@ public class TwoDimViewPager extends ViewPager {
                         }
                         itemIndex--;
                         curIndex--;
-                        ii = itemIndex >= 0 ? mItems.get(itemIndex) : null;
+                        ii = itemIndex >= 0 ? mItems.get(0).get(itemIndex) : null;
                     }
-                } else if (ii != null && pos == ii.position) {
+                } else if (ii != null && pos == ii.position[0]) {
                     extraWidthLeft += ii.widthFactor;
                     itemIndex--;
-                    ii = itemIndex >= 0 ? mItems.get(itemIndex) : null;
+                    ii = itemIndex >= 0 ? mItems.get(0).get(itemIndex) : null;
                 } else {
                     ii = addNewItem(pos, itemIndex + 1);
                     extraWidthLeft += ii.widthFactor;
                     curIndex++;
-                    ii = itemIndex >= 0 ? mItems.get(itemIndex) : null;
+                    ii = itemIndex >= 0 ? mItems.get(0).get(itemIndex) : null;
                 }
             }
 
             float extraWidthRight = curItem.widthFactor;
             itemIndex = curIndex + 1;
             if (extraWidthRight < 2.f) {
-                ii = itemIndex < mItems.size() ? mItems.get(itemIndex) : null;
+                ii = itemIndex < mItems.get(0).size() ? mItems.get(0).get(itemIndex) : null;
                 final float rightWidthNeeded = clientWidth <= 0 ? 0 :
                         (float) getPaddingRight() / (float) clientWidth + 2.f;
                 for (int pos = mCurItem + 1; pos < N; pos++) {
@@ -1444,24 +1564,24 @@ public class TwoDimViewPager extends ViewPager {
                         if (ii == null) {
                             break;
                         }
-                        if (pos == ii.position && !ii.scrolling) {
-                            mItems.remove(itemIndex);
+                        if (pos == ii.position[0] && !ii.scrolling) {
+                            mItems.get(mCurItemV).remove(itemIndex);
                             mAdapter.destroyItem(this, pos, ii.object);
                             if (DEBUG) {
                                 Log.i(TAG, "populate() - destroyItem() with pos: " + pos
                                         + " view: " + ((View) ii.object));
                             }
-                            ii = itemIndex < mItems.size() ? mItems.get(itemIndex) : null;
+                            ii = itemIndex < mItems.get(0).size() ? mItems.get(0).get(itemIndex) : null;
                         }
-                    } else if (ii != null && pos == ii.position) {
+                    } else if (ii != null && pos == ii.position[0]) {
                         extraWidthRight += ii.widthFactor;
                         itemIndex++;
-                        ii = itemIndex < mItems.size() ? mItems.get(itemIndex) : null;
+                        ii = itemIndex < mItems.get(0).size() ? mItems.get(0).get(itemIndex) : null;
                     } else {
                         ii = addNewItem(pos, itemIndex);
                         itemIndex++;
                         extraWidthRight += ii.widthFactor;
-                        ii = itemIndex < mItems.size() ? mItems.get(itemIndex) : null;
+                        ii = itemIndex < mItems.get(0).size() ? mItems.get(0).get(itemIndex) : null;
                     }
                 }
             }
@@ -1474,7 +1594,7 @@ public class TwoDimViewPager extends ViewPager {
         if (DEBUG) {
             Log.i(TAG, "Current page list:");
             for (int i = 0; i < mItems.size(); i++) {
-                Log.i(TAG, "#" + i + ": page " + mItems.get(i).position);
+                Log.i(TAG, "#" + i + ": page " + mItems.get(0).get(i).position);
             }
         }
 
@@ -1492,7 +1612,8 @@ public class TwoDimViewPager extends ViewPager {
                 final ItemInfo ii = infoForChild(child);
                 if (ii != null) {
                     lp.widthFactor = ii.widthFactor;
-                    lp.position = ii.position;
+                    lp.position[0] = ii.position[0];
+                    lp.position[1] = ii.position[1];
                 }
             }
         }
@@ -1501,11 +1622,11 @@ public class TwoDimViewPager extends ViewPager {
         if (hasFocus()) {
             View currentFocused = findFocus();
             ItemInfo ii = currentFocused != null ? infoForAnyChild(currentFocused) : null;
-            if (ii == null || ii.position != mCurItem) {
+            if (ii == null || ii.position[0] != mCurItem) {
                 for (int i = 0; i < getChildCount(); i++) {
                     View child = getChildAt(i);
                     ii = infoForChild(child);
-                    if (ii != null && ii.position == mCurItem) {
+                    if (ii != null && ii.position[0] == mCurItem) {
                         if (child.requestFocus(View.FOCUS_FORWARD)) {
                             break;
                         }
@@ -1537,20 +1658,20 @@ public class TwoDimViewPager extends ViewPager {
         final float marginOffset = width > 0 ? (float) mPageMargin / width : 0;
         // Fix up offsets for later layout.
         if (oldCurInfo != null) {
-            final int oldCurPosition = oldCurInfo.position;
+            final int oldCurPosition = oldCurInfo.position[0];
             // Base offsets off of oldCurInfo.
-            if (oldCurPosition < curItem.position) {
+            if (oldCurPosition < curItem.position[0]) {
                 int itemIndex = 0;
                 ItemInfo ii = null;
                 float offset = oldCurInfo.offset + oldCurInfo.widthFactor + marginOffset;
                 for (int pos = oldCurPosition + 1;
-                     pos <= curItem.position && itemIndex < mItems.size(); pos++) {
-                    ii = mItems.get(itemIndex);
-                    while (pos > ii.position && itemIndex < mItems.size() - 1) {
+                     pos <= curItem.position[0] && itemIndex < mItems.get(0).size(); pos++) {
+                    ii = mItems.get(0).get(itemIndex);
+                    while (pos > ii.position[0] && itemIndex < mItems.get(0).size() - 1) {
                         itemIndex++;
-                        ii = mItems.get(itemIndex);
+                        ii = mItems.get(0).get(itemIndex);
                     }
-                    while (pos < ii.position) {
+                    while (pos < ii.position[0]) {
                         // We don't have an item populated for this,
                         // ask the adapter for an offset.
                         offset += mAdapter.getPageWidth(pos) + marginOffset;
@@ -1559,18 +1680,18 @@ public class TwoDimViewPager extends ViewPager {
                     ii.offset = offset;
                     offset += ii.widthFactor + marginOffset;
                 }
-            } else if (oldCurPosition > curItem.position) {
+            } else if (oldCurPosition > curItem.position[0]) {
                 int itemIndex = mItems.size() - 1;
                 ItemInfo ii = null;
                 float offset = oldCurInfo.offset;
                 for (int pos = oldCurPosition - 1;
-                     pos >= curItem.position && itemIndex >= 0; pos--) {
-                    ii = mItems.get(itemIndex);
-                    while (pos < ii.position && itemIndex > 0) {
+                     pos >= curItem.position[0] && itemIndex >= 0; pos--) {
+                    ii = mItems.get(0).get(itemIndex);
+                    while (pos < ii.position[0] && itemIndex > 0) {
                         itemIndex--;
-                        ii = mItems.get(itemIndex);
+                        ii = mItems.get(0).get(itemIndex);
                     }
-                    while (pos > ii.position) {
+                    while (pos > ii.position[0]) {
                         // We don't have an item populated for this,
                         // ask the adapter for an offset.
                         offset -= mAdapter.getPageWidth(pos) + marginOffset;
@@ -1585,29 +1706,29 @@ public class TwoDimViewPager extends ViewPager {
         // Base all offsets off of curItem.
         final int itemCount = mItems.size();
         float offset = curItem.offset;
-        int pos = curItem.position - 1;
-        mFirstOffset = curItem.position == 0 ? curItem.offset : -Float.MAX_VALUE;
-        mLastOffset = curItem.position == N - 1
+        int pos = curItem.position[0] - 1;
+        mFirstOffset = curItem.position[0] == 0 ? curItem.offset : -Float.MAX_VALUE;
+        mLastOffset = curItem.position[0] == N - 1
                 ? curItem.offset + curItem.widthFactor - 1 : Float.MAX_VALUE;
         // Previous pages
         for (int i = curIndex - 1; i >= 0; i--, pos--) {
-            final ItemInfo ii = mItems.get(i);
-            while (pos > ii.position) {
+            final ItemInfo ii = mItems.get(0).get(i);
+            while (pos > ii.position[0]) {
                 offset -= mAdapter.getPageWidth(pos--) + marginOffset;
             }
             offset -= ii.widthFactor + marginOffset;
             ii.offset = offset;
-            if (ii.position == 0) mFirstOffset = offset;
+            if (ii.position[0] == 0) mFirstOffset = offset;
         }
         offset = curItem.offset + curItem.widthFactor + marginOffset;
-        pos = curItem.position + 1;
+        pos = curItem.position[0] + 1;
         // Next pages
         for (int i = curIndex + 1; i < itemCount; i++, pos++) {
-            final ItemInfo ii = mItems.get(i);
-            while (pos < ii.position) {
+            final ItemInfo ii = mItems.get(0).get(i);
+            while (pos < ii.position[0]) {
                 offset += mAdapter.getPageWidth(pos++) + marginOffset;
             }
-            if (ii.position == N - 1) {
+            if (ii.position[0] == N - 1) {
                 mLastOffset = offset + ii.widthFactor - 1;
             }
             ii.offset = offset;
@@ -1624,7 +1745,7 @@ public class TwoDimViewPager extends ViewPager {
      * contains that state.
      */
     public static class SavedState extends AbsSavedState {
-        int position;
+        int position[] = new int[2];
         Parcelable adapterState;
         ClassLoader loader;
 
@@ -1635,7 +1756,7 @@ public class TwoDimViewPager extends ViewPager {
         @Override
         public void writeToParcel(Parcel out, int flags) {
             super.writeToParcel(out, flags);
-            out.writeInt(position);
+            out.writeInt(position[0]);
             out.writeParcelable(adapterState, flags);
         }
 
@@ -1667,7 +1788,8 @@ public class TwoDimViewPager extends ViewPager {
             if (loader == null) {
                 loader = getClass().getClassLoader();
             }
-            position = in.readInt();
+            position[0] = in.readInt();
+            position[1] = 0;
             adapterState = in.readParcelable(loader);
             this.loader = loader;
         }
@@ -1677,7 +1799,8 @@ public class TwoDimViewPager extends ViewPager {
     public Parcelable onSaveInstanceState() {
         Parcelable superState = super.onSaveInstanceState();
         SavedState ss = new SavedState(superState);
-        ss.position = mCurItem;
+        ss.position[0] = mCurItem;
+        ss.position[1] = mCurItemV;
         if (mAdapter != null) {
             ss.adapterState = mAdapter.saveState();
         }
@@ -1746,10 +1869,12 @@ public class TwoDimViewPager extends ViewPager {
     }
 
     ItemInfo infoForChild(View child) {
-        for (int i = 0; i < mItems.size(); i++) {
-            ItemInfo ii = mItems.get(i);
-            if (mAdapter.isViewFromObject(child, ii.object)) {
-                return ii;
+        for (int i = 0; i < mItems.get(0).size(); i++) {
+            for (int j = 0; j < mItems.get(i).size(); j++) {
+                ItemInfo ii = mItems.get(i).get(j);
+                if (mAdapter.isViewFromObject(child, ii.object)) {
+                    return ii;
+                }
             }
         }
         return null;
@@ -1766,11 +1891,13 @@ public class TwoDimViewPager extends ViewPager {
         return infoForChild(child);
     }
 
-    ItemInfo infoForPosition(int position) {
+    ItemInfo infoForPosition(int positionX, int positionY) {
         for (int i = 0; i < mItems.size(); i++) {
-            ItemInfo ii = mItems.get(i);
-            if (ii.position == position) {
-                return ii;
+            for (int j = 0; j < mItems.get(i).size(); j++) {
+                ItemInfo ii = mItems.get(i).get(j);
+                if (ii.position[0] == positionX && ii.position[1] == positionY) {
+                    return ii;
+                }
             }
         }
         return null;
@@ -1889,9 +2016,9 @@ public class TwoDimViewPager extends ViewPager {
     }
 
     private void recomputeScrollPosition(int width, int oldWidth, int margin, int oldMargin) {
-        if (oldWidth > 0 && !mItems.isEmpty()) {
+        if (oldWidth > 0 && !(mItems.get(0).size()==0)) {
             if (!mScroller.isFinished()) {
-                mScroller.setFinalX(getCurrentItem() * getClientWidth());
+                mScroller.setFinalX(getCurrentItem()[0] * getClientWidth());
             } else {
                 final int widthWithMargin = width - getPaddingLeft() - getPaddingRight() + margin;
                 final int oldWidthWithMargin = oldWidth - getPaddingLeft() - getPaddingRight()
@@ -1903,7 +2030,7 @@ public class TwoDimViewPager extends ViewPager {
                 scrollTo(newOffsetPixels, getScrollY());
             }
         } else {
-            final ItemInfo ii = infoForPosition(mCurItem);
+            final ItemInfo ii = infoForPosition(mCurItem, mCurItemV);
             final float scrollOffset = ii != null ? Math.min(ii.offset, mLastOffset) : 0;
             final int scrollPos =
                     (int) (scrollOffset * (width - getPaddingLeft() - getPaddingRight()));
@@ -1924,6 +2051,7 @@ public class TwoDimViewPager extends ViewPager {
         int paddingRight = getPaddingRight();
         int paddingBottom = getPaddingBottom();
         final int scrollX = getScrollX();
+        final int scrollY = getScrollY();
 
         int decorCount = 0;
 
@@ -2020,7 +2148,7 @@ public class TwoDimViewPager extends ViewPager {
         mDecorChildCount = decorCount;
 
         if (mFirstLayout) {
-            scrollToItem(mCurItem, false, 0, false);
+            scrollToItem(mCurItem, mCurItemV, false, 0, false);
         }
         mFirstLayout = false;
     }
@@ -2052,14 +2180,14 @@ public class TwoDimViewPager extends ViewPager {
     }
 
     private boolean pageScrolled(int xpos) {
-        if (mItems.size() == 0) {
+        if (mItems.get(0).size() == 0) {
             if (mFirstLayout) {
                 // If we haven't been laid out yet, we probably just haven't been populated yet.
                 // Let's skip this call since it doesn't make sense in this state
                 return false;
             }
             mCalledSuper = false;
-            onPageScrolled(0, 0, 0);
+            onPageScrolled(new int[] {0,0}, 0, 0);
             if (!mCalledSuper) {
                 throw new IllegalStateException(
                         "onPageScrolled did not call superclass implementation");
@@ -2070,11 +2198,11 @@ public class TwoDimViewPager extends ViewPager {
         final int width = getClientWidth();
         final int widthWithMargin = width + mPageMargin;
         final float marginOffset = (float) mPageMargin / width;
-        final int currentPage = ii.position;
+        final int[] currentPage = ii.position;
         final float pageOffset = (((float) xpos / width) - ii.offset)
                 / (ii.widthFactor + marginOffset);
         final int offsetPixels = (int) (pageOffset * widthWithMargin);
-
+        //TODO
         mCalledSuper = false;
         onPageScrolled(currentPage, pageOffset, offsetPixels);
         if (!mCalledSuper) {
@@ -2097,7 +2225,7 @@ public class TwoDimViewPager extends ViewPager {
      * @param offsetPixels Value in pixels indicating the offset from position.
      */
     @CallSuper
-    protected void onPageScrolled(int position, float offset, int offsetPixels) {
+    protected void onPageScrolled(int[] position, float offset, int offsetPixels) {
         // Offset any decor views if needed - keep them on-screen at all times.
         if (mDecorChildCount > 0) {
             final int scrollX = getScrollX();
@@ -2156,7 +2284,7 @@ public class TwoDimViewPager extends ViewPager {
         mCalledSuper = true;
     }
 
-    private void dispatchOnPageScrolled(int position, float offset, int offsetPixels) {
+    private void dispatchOnPageScrolled(int[] position, float offset, int offsetPixels) {
         if (mOnPageChangeListener != null) {
             mOnPageChangeListener.onPageScrolled(position, offset, offsetPixels);
         }
@@ -2173,7 +2301,7 @@ public class TwoDimViewPager extends ViewPager {
         }
     }
 
-    private void dispatchOnPageSelected(int position) {
+    private void dispatchOnPageSelected(int[] position) {
         if (mOnPageChangeListener != null) {
             mOnPageChangeListener.onPageSelected(position);
         }
@@ -2228,8 +2356,8 @@ public class TwoDimViewPager extends ViewPager {
             }
         }
         mPopulatePending = false;
-        for (int i = 0; i < mItems.size(); i++) {
-            ItemInfo ii = mItems.get(i);
+        for (int i = 0; i < mItems.get(0).size(); i++) {
+            ItemInfo ii = mItems.get(0).get(i);
             if (ii.scrolling) {
                 needPopulate = true;
                 ii.scrolling = false;
@@ -2263,7 +2391,9 @@ public class TwoDimViewPager extends ViewPager {
         endDrag();
         mLeftEdge.onRelease();
         mRightEdge.onRelease();
-        needsInvalidate = mLeftEdge.isFinished() || mRightEdge.isFinished();
+//        mTopEdge.onRelease();
+//        mBottomEdge.onRelease();
+        needsInvalidate = mLeftEdge.isFinished() || mRightEdge.isFinished() || mTopEdge.isFinished() || mBottomEdge.isFinished();
         return needsInvalidate;
     }
 
@@ -2289,13 +2419,13 @@ public class TwoDimViewPager extends ViewPager {
         boolean leftAbsolute = true;
         boolean rightAbsolute = true;
 
-        final ItemInfo firstItem = mItems.get(0);
-        final ItemInfo lastItem = mItems.get(mItems.size() - 1);
-        if (firstItem.position != 0) {
+        final ItemInfo firstItem = mItems.get(0).get(0);
+        final ItemInfo lastItem = mItems.get(0).get(mItems.size() - 1);
+        if (firstItem.position[0] != 0) {
             leftAbsolute = false;
             leftBound = firstItem.offset * width;
         }
-        if (lastItem.position != mAdapter.getCount() - 1) {
+        if (lastItem.position[0] != mAdapter.getCount() - 1) {
             rightAbsolute = false;
             rightBound = lastItem.offset * width;
         }
@@ -2337,15 +2467,15 @@ public class TwoDimViewPager extends ViewPager {
         boolean first = true;
 
         ItemInfo lastItem = null;
-        for (int i = 0; i < mItems.size(); i++) {
-            ItemInfo ii = mItems.get(i);
+        for (int i = 0; i < mItems.get(0).size(); i++) {
+            ItemInfo ii = mItems.get(0).get(i);
             float offset;
-            if (!first && ii.position != lastPos + 1) {
+            if (!first && ii.position[0] != lastPos + 1) {
                 // Create a synthetic item for a missing page.
                 ii = mTempItem;
                 ii.offset = lastOffset + lastWidth + marginOffset;
-                ii.position = lastPos + 1;
-                ii.widthFactor = mAdapter.getPageWidth(ii.position);
+                ii.position[0] = lastPos + 1;
+                ii.widthFactor = mAdapter.getPageWidth(ii.position[0]);
                 i--;
             }
             offset = ii.offset;
@@ -2360,7 +2490,7 @@ public class TwoDimViewPager extends ViewPager {
                 return lastItem;
             }
             first = false;
-            lastPos = ii.position;
+            lastPos = ii.position[0];
             lastOffset = offset;
             lastWidth = ii.widthFactor;
             lastItem = ii;
@@ -2369,21 +2499,32 @@ public class TwoDimViewPager extends ViewPager {
         return lastItem;
     }
 
-    private int determineTargetPage(int currentPage, float pageOffset, int velocity, int deltaX) {
-        int targetPage;
+    private int[] determineTargetPage(int[] currentPage, float pageOffset, int velocity, int deltaX, int deltaY) {
+        int[] targetPage = currentPage;
+        int constant;
+        int var;
+        if(deltaX<deltaY){
+            constant=0;
+            var=1;
+        }
+        else{
+            constant=1;
+            var=0;
+        }
+        targetPage[1]=currentPage[1];
         if (Math.abs(deltaX) > mFlingDistance && Math.abs(velocity) > mMinimumVelocity) {
-            targetPage = velocity > 0 ? currentPage : currentPage + 1;
+            targetPage[var] = velocity > 0 ? currentPage[var] : currentPage[var] + 1;
         } else {
-            final float truncator = currentPage >= mCurItem ? 0.4f : 0.6f;
-            targetPage = currentPage + (int) (pageOffset + truncator);
+            final float truncator = currentPage[var] >= mCurItem ? 0.4f : 0.6f;
+            targetPage[var] = currentPage[var] + (int) (pageOffset + truncator);
         }
 
-        if (mItems.size() > 0) {
-            final ItemInfo firstItem = mItems.get(0);
-            final ItemInfo lastItem = mItems.get(mItems.size() - 1);
+        if (mItems.get(0).size() > 0) {
+            final ItemInfo firstItem = mItems.get(0).get(currentPage[constant]);
+            final ItemInfo lastItem = mItems.get(mItems.size() - 1).get(currentPage[constant]);
 
             // Only let the user target pages we have items for
-            targetPage = Math.max(firstItem.position, Math.min(targetPage, lastItem.position));
+            targetPage[var] = Math.max(firstItem.position[var], Math.min(targetPage[var], lastItem.position[var]));
         }
 
         return targetPage;
@@ -2436,24 +2577,24 @@ public class TwoDimViewPager extends ViewPager {
         super.onDraw(canvas);
 
         // Draw the margin drawable between pages if needed.
-        if (mPageMargin > 0 && mMarginDrawable != null && mItems.size() > 0 && mAdapter != null) {
+        if (mPageMargin > 0 && mMarginDrawable != null && mItems.get(0).size() > 0 && mAdapter != null) {
             final int scrollX = getScrollX();
             final int width = getWidth();
 
             final float marginOffset = (float) mPageMargin / width;
             int itemIndex = 0;
-            ItemInfo ii = mItems.get(0);
+            ItemInfo ii = mItems.get(0).get(0);
             float offset = ii.offset;
-            final int itemCount = mItems.size();
-            final int firstPos = ii.position;
-            final int lastPos = mItems.get(itemCount - 1).position;
+            final int itemCount = mItems.get(0).size();
+            final int firstPos = ii.position[0];
+            final int lastPos = mItems.get(0).get(itemCount - 1).position[0];
             for (int pos = firstPos; pos < lastPos; pos++) {
-                while (pos > ii.position && itemIndex < itemCount) {
-                    ii = mItems.get(++itemIndex);
+                while (pos > ii.position[0] && itemIndex < itemCount) {
+                    ii = mItems.get(0).get(++itemIndex);
                 }
 
                 float drawAt;
-                if (pos == ii.position) {
+                if (pos == ii.position[0]) {
                     drawAt = (ii.offset + ii.widthFactor) * width;
                     offset = ii.offset + ii.widthFactor + marginOffset;
                 } else {
@@ -2531,12 +2672,13 @@ public class TwoDimViewPager extends ViewPager {
             final int width = getClientWidth();
             final int scrollX = getScrollX();
             final ItemInfo ii = infoForCurrentScrollPosition();
-            final int currentPage = ii.position;
+            final int[] currentPage = ii.position;
             final float pageOffset = (((float) scrollX / width) - ii.offset) / ii.widthFactor;
             final int totalDelta = (int) (mLastMotionX - mInitialMotionX);
-            int nextPage = determineTargetPage(currentPage, pageOffset, initialVelocity,
-                    totalDelta);
-            setCurrentItemInternal(nextPage, true, true, initialVelocity);
+            final int deltaY = (int) (mLastMotionY - mInitialMotionY);
+            int[] nextPage = determineTargetPage(currentPage, pageOffset, initialVelocity,
+                    totalDelta, deltaY);
+            setCurrentItemInternal(nextPage[0], nextPage[1], true, true, initialVelocity);
         }
         endDrag();
 
@@ -2568,12 +2710,12 @@ public class TwoDimViewPager extends ViewPager {
         float leftBound = width * mFirstOffset;
         float rightBound = width * mLastOffset;
 
-        final ItemInfo firstItem = mItems.get(0);
-        final ItemInfo lastItem = mItems.get(mItems.size() - 1);
-        if (firstItem.position != 0) {
+        final ItemInfo firstItem = mItems.get(mCurItemV).get(0);
+        final ItemInfo lastItem = mItems.get(mCurItemV).get(mItems.get(mCurItemV).size() - 1);
+        if (firstItem.position[0] != 0) {
             leftBound = firstItem.offset * width;
         }
-        if (lastItem.position != mAdapter.getCount() - 1) {
+        if (lastItem.position[0] != mAdapter.getCount() - 1) {
             rightBound = lastItem.offset * width;
         }
 
@@ -2645,6 +2787,31 @@ public class TwoDimViewPager extends ViewPager {
                     }
                 }
             }
+        }
+    }
+
+    //TODO
+    /**
+     * Check if this ViewPager can be scrolled vertically in a certain direction.
+     *
+     * @param direction Negative to check scrolling down, positive to check scrolling up.
+     * @return Whether this ViewPager can be scrolled in the specified direction. It will always
+     *         return false if the specified direction is 0.
+     */
+    @Override
+    public boolean canScrollVertically(int direction) {
+        if (mAdapter == null) {
+            return false;
+        }
+
+        final int height = getClientHeight();
+        final int scrollX = getScrollX();
+        if (direction < 0) {
+            return (scrollX > (int) (height * mFirstOffset));
+        } else if (direction > 0) {
+            return (scrollX < (int) (height * mLastOffset));
+        } else {
+            return false;
         }
     }
 
@@ -2865,7 +3032,7 @@ public class TwoDimViewPager extends ViewPager {
 
     boolean pageLeft() {
         if (mCurItem > 0) {
-            setCurrentItem(mCurItem - 1, true);
+            setCurrentItem(new int[]{mCurItem - 1, mCurItemV}, true);
             return true;
         }
         return false;
@@ -2873,7 +3040,7 @@ public class TwoDimViewPager extends ViewPager {
 
     boolean pageRight() {
         if (mAdapter != null && mCurItem < (mAdapter.getCount() - 1)) {
-            setCurrentItem(mCurItem + 1, true);
+            setCurrentItem(new int[]{mCurItem + 1, mCurItemV}, true);
             return true;
         }
         return false;
@@ -2881,7 +3048,7 @@ public class TwoDimViewPager extends ViewPager {
 
     boolean pageUp() {
         if (mCurItemV > 0) {
-            setCurrentItem(mCurItemV - 1, true);
+            setCurrentItem(new int[]{mCurItem, mCurItemV - 1}, true);
             return true;
         }
         return false;
@@ -2889,7 +3056,7 @@ public class TwoDimViewPager extends ViewPager {
 
     boolean pageDown() {
         if (mAdapter != null && mCurItemV < (mAdapter.getCount() - 1)) {
-            setCurrentItem(mCurItemV + 1, true);
+            setCurrentItem(new int[]{mCurItem, mCurItemV + 1}, true);
             return true;
         }
         return false;
@@ -2909,7 +3076,7 @@ public class TwoDimViewPager extends ViewPager {
                 final View child = getChildAt(i);
                 if (child.getVisibility() == VISIBLE) {
                     ItemInfo ii = infoForChild(child);
-                    if (ii != null && ii.position == mCurItem) {
+                    if (ii != null && ii.position[0] == mCurItem && ii.position[1] == mCurItemV) {
                         child.addFocusables(views, direction, focusableMode);
                     }
                 }
@@ -2949,7 +3116,7 @@ public class TwoDimViewPager extends ViewPager {
             final View child = getChildAt(i);
             if (child.getVisibility() == VISIBLE) {
                 ItemInfo ii = infoForChild(child);
-                if (ii != null && ii.position == mCurItem) {
+                if (ii != null && ii.position[0] == mCurItem && ii.position[1] == mCurItem) {
                     child.addTouchables(views);
                 }
             }
@@ -2979,7 +3146,7 @@ public class TwoDimViewPager extends ViewPager {
             View child = getChildAt(i);
             if (child.getVisibility() == VISIBLE) {
                 ItemInfo ii = infoForChild(child);
-                if (ii != null && ii.position == mCurItem) {
+                if (ii != null && ii.position[0] == mCurItem && ii.position[1] == mCurItem) {
                     if (child.requestFocus(direction, previouslyFocusedRect)) {
                         return true;
                     }
@@ -3002,7 +3169,7 @@ public class TwoDimViewPager extends ViewPager {
             final View child = getChildAt(i);
             if (child.getVisibility() == VISIBLE) {
                 final ItemInfo ii = infoForChild(child);
-                if (ii != null && ii.position == mCurItem
+                if (ii != null && ii.position[0] == mCurItem && ii.position[1] == mCurItem
                         && child.dispatchPopulateAccessibilityEvent(event)) {
                     return true;
                 }
@@ -3013,8 +3180,23 @@ public class TwoDimViewPager extends ViewPager {
     }
 
     @Override
+    protected ViewGroup.LayoutParams generateDefaultLayoutParams() {
+        return new LayoutParams();
+    }
+
+    @Override
+    protected ViewGroup.LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
+        return generateDefaultLayoutParams();
+    }
+
+    @Override
     protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
         return p instanceof LayoutParams && super.checkLayoutParams(p);
+    }
+
+    @Override
+    public ViewGroup.LayoutParams generateLayoutParams(AttributeSet attrs) {
+        return new LayoutParams(getContext(), attrs);
     }
 
     class MyAccessibilityDelegate extends AccessibilityDelegateCompat {
@@ -3052,13 +3234,13 @@ public class TwoDimViewPager extends ViewPager {
             switch (action) {
                 case AccessibilityNodeInfoCompat.ACTION_SCROLL_FORWARD: {
                     if (canScrollHorizontally(1)) {
-                        setCurrentItem(mCurItem + 1);
+                        setCurrentItem(new int[]{mCurItem + 1, mCurItemV});
                         return true;
                     }
                 } return false;
                 case AccessibilityNodeInfoCompat.ACTION_SCROLL_BACKWARD: {
                     if (canScrollHorizontally(-1)) {
-                        setCurrentItem(mCurItem - 1);
+                        setCurrentItem(new int[]{mCurItem - 1, mCurItemV});
                         return true;
                     }
                 } return false;
@@ -3117,7 +3299,7 @@ public class TwoDimViewPager extends ViewPager {
         /**
          * Adapter position this view is for if !isDecor
          */
-        int position;
+        int position[] = new int[2];
 
         /**
          * Current child index within the ViewPager that this view occupies
@@ -3145,7 +3327,7 @@ public class TwoDimViewPager extends ViewPager {
             if (llp.isDecor != rlp.isDecor) {
                 return llp.isDecor ? 1 : -1;
             }
-            return llp.position - rlp.position;
+            return llp.position[0] - rlp.position[0];
         }
     }
 }

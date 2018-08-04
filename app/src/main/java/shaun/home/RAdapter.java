@@ -1,12 +1,13 @@
 package shaun.home;
 
+import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
+import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,9 +16,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class RAdapter extends RecyclerView.Adapter<RAdapter.ViewHolder> {
     public ArrayList<AppInfo> appsList;
@@ -45,21 +45,20 @@ public class RAdapter extends RecyclerView.Adapter<RAdapter.ViewHolder> {
 
             Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(appsList.get(pos).packageName.toString());
             context.startActivity(launchIntent);
-            Toast.makeText(v.getContext(), appsList.get(pos).label.toString(), Toast.LENGTH_LONG).show();
 
         }
     }
+    public void addItem(AppInfo a){
+        appsList.add(a);
+    }
 
 
-    PackageManager pm;
     public RAdapter(Context c) {
 
         //This is where we build our list of app details, using the app
         //object we created to store the label, package name and icon
 
-        pm = c.getPackageManager();
         appsList = new ArrayList<AppInfo>();
-        new myThread().execute();
 //
 //        Intent i = new Intent(Intent.ACTION_MAIN, null);
 //        i.addCategory(Intent.CATEGORY_LAUNCHER);
@@ -92,6 +91,7 @@ public class RAdapter extends RecyclerView.Adapter<RAdapter.ViewHolder> {
         textView.setText(appLabel);
         ImageView imageView = viewHolder.img;
         imageView.setImageDrawable(appIcon);
+        textView.setTag(i);
     }
 
 
@@ -106,12 +106,93 @@ public class RAdapter extends RecyclerView.Adapter<RAdapter.ViewHolder> {
 
 
     @Override
-    public RAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RAdapter.ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
 
         //This is what adds the code we've written in here to our target view
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
         View view = inflater.inflate(R.layout.row, parent, false);
+        view.setOnLongClickListener(new View.OnLongClickListener(){
+            @Override
+            public boolean onLongClick(View view){
+
+                ClipData.Item item = new ClipData.Item((CharSequence)appsList.get((int)view.findViewById(R.id.textView).getTag()).packageName);
+                String[] mimeTypes = {ClipDescription.MIMETYPE_TEXT_PLAIN};
+                view.startDragAndDrop(new ClipData(((TextView)view.findViewById(R.id.textView)).getText(),mimeTypes, item), new View.DragShadowBuilder(view.findViewById(R.id.img)),null,0);
+                Context context = view.getContext();
+                while (context instanceof ContextWrapper) {
+                    if (context instanceof AppDrawer) {
+                        break;
+                    }
+                    context = ((ContextWrapper)context).getBaseContext();
+                }
+                //TODO hmmmmm?
+                ((AppDrawer) context).inflateDrop();
+                return true;
+            }
+        });
+        view.setOnDragListener(new View.OnDragListener(){
+            public boolean onDrag(View v, DragEvent event) {
+                Context context = v.getContext();
+                while (context instanceof ContextWrapper) {
+                    if (context instanceof AppDrawer) {
+                        break;
+                    }
+                    context = ((ContextWrapper)context).getBaseContext();
+                }
+
+                switch (event.getAction()) {
+                    case DragEvent.ACTION_DRAG_STARTED:
+                        //TODO hmmm??
+                        return true;
+                    case DragEvent.ACTION_DRAG_ENDED:
+
+                        //kill drawer
+                        ((AppDrawer) context).finish();
+                        return true;
+
+                    default:
+                        return true;
+                }
+            }
+
+        });
+//        view.setOnDragListener(new View.OnDragListener(){
+//            public boolean onDrag(View v, DragEvent event) {
+//                switch(event.getAction()) {
+//                    case DragEvent.ACTION_DRAG_STARTED:
+//                        break;
+//
+//                    case DragEvent.ACTION_DRAG_ENTERED:
+//                        int x_cord = (int) event.getX();
+//                        int y_cord = (int) event.getY();
+//                        break;
+//
+//                    case DragEvent.ACTION_DRAG_EXITED :
+//                        x_cord = (int) event.getX();
+//                        y_cord = (int) event.getY();
+//    //                    layoutParams.leftMargin = x_cord;
+//    //                    layoutParams.topMargin = y_cord;
+//    //                    v.setLayoutParams(layoutParams);
+//                        break;
+//
+//                    case DragEvent.ACTION_DRAG_LOCATION  :
+//                        x_cord = (int) event.getX();
+//                        y_cord = (int) event.getY();
+//                        break;
+//
+//                    case DragEvent.ACTION_DRAG_ENDED   :
+//                        // Do nothing
+//                        break;
+//
+//                    case DragEvent.ACTION_DROP:
+//                        // Do nothing
+//                        break;
+//                    default: break;
+//                }
+//                return true;
+//            }
+//        });
 
         ViewHolder viewHolder = new ViewHolder(view);
         return viewHolder;
@@ -121,36 +202,4 @@ public class RAdapter extends RecyclerView.Adapter<RAdapter.ViewHolder> {
         notifyItemInserted(getItemCount()-1);
 
     }
-
-public class myThread extends AsyncTask<Void, Void, String> {
-
-    @Override
-    protected String doInBackground(Void... Params) {
-
-        Intent i = new Intent(Intent.ACTION_MAIN, null);
-        i.addCategory(Intent.CATEGORY_LAUNCHER);
-
-        List<ResolveInfo> allApps = pm.queryIntentActivities(i, 0);
-        for(ResolveInfo ri:allApps) {
-            AppInfo app = new AppInfo();
-            app.label = ri.loadLabel(pm);
-            app.packageName = ri.activityInfo.packageName;
-            app.icon = ri.activityInfo.loadIcon(pm);
-            appsList.add(app);
-        }
-        Collections.sort(appsList,new Comparator<AppInfo>(){
-            public int compare(AppInfo one, AppInfo two) {
-                return one.label.toString().compareTo(two.label.toString());
-        }});
-        return "Success";
-
-    }
-
-    @Override
-    protected void onPostExecute(String result) {
-        super.onPostExecute(result);
-        updateStuff();
-    }
-
-}
 }
